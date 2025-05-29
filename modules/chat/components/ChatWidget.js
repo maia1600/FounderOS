@@ -7,6 +7,8 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const API_URL = 'https://founder-os-psi.vercel.app/api/chat'; // <- Absoluto
+
   useEffect(() => {
     let id = localStorage.getItem('session_id');
     if (!id) {
@@ -24,7 +26,7 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
