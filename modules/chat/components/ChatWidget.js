@@ -26,15 +26,16 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-     const res = await fetch('https://founder-os-psi.vercel.app/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: sessionId,
-          user_message: input,
-          source_page: 'index2.html',
-        }),
-      });
+
+const res = await fetch(API_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    session_id: sessionId,
+    user_message: input,
+    source_page: 'index2.html',
+  }),
+});
 
       const data = await res.json();
       if (data.response) {
