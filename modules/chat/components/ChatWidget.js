@@ -7,7 +7,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const API_URL = 'https://founder-os-psi.vercel.app/pages/api/chat'; // <- Absoluto
+  const API_URL = 'https://founder-os-psi.vercel.app/pages/api/chat'; // <- Absolutos
 
   useEffect(() => {
     let id = localStorage.getItem('session_id');
