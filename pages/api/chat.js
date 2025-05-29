@@ -5,6 +5,14 @@ const pool = new Pool({
 });
 
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -15,10 +23,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Simular resposta (podes trocar depois por IA real)
   const ai_reply = `Simulação: baseado na sua mensagem, o serviço pode custar entre 100€ e 200€.`;
 
-  // Simular extração de metadados (substituir por lógica GPT no futuro)
   const metadata = {
     categoria_servico: user_message.toLowerCase().includes("pintura") ? "pintura" : "geral",
     marca_carro: user_message.includes("Golf") ? "Volkswagen" : null,
@@ -29,7 +35,7 @@ export default async function handler(req, res) {
   try {
     await pool.query(
       `INSERT INTO conversations 
-        (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
+       (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         session_id,
@@ -49,4 +55,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erro interno ao gravar a conversa' });
   }
 }
+
 
