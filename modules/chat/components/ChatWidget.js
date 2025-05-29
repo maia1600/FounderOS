@@ -9,20 +9,20 @@ export default function ChatWidget() {
 
  const API_URL = 'https://founder-os-psi.vercel.app/api/chat';
 
-  useEffect(() => {
-    let id = localStorage.getItem('session_id');
+useEffect(() => {
+  let id = localStorage.getItem('session_id');
+  if (!id) {
+    id = uuidv4();
+    localStorage.setItem('session_id', id);
+  }
+  setSessionId(id);
+}, []);
+
+  const sendMessage = async () => {
     if (!input.trim() || input.trim().length < 5) {
   alert('Por favor, descreva melhor o problema.');
   return;
 }
-      id = uuidv4();
-      localStorage.setItem('session_id', id);
-    }
-    setSessionId(id);
-  }, []);
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
 
     const userMessage = { role: 'user', content: input };
     setMessages((prev) => [...prev, userMessage]);
