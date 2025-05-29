@@ -8,7 +8,7 @@ export default function ConversasDashboard() {
       try {
         const res = await fetch('/api/conversas', {
           headers: {
-            'x-dashboard-secret': process.env.NEXT_PUBLIC_DASHBOARD_SECRET,
+            'capri123': process.env.NEXT_PUBLIC_DASHBOARD_SECRET,
           },
         });
 
