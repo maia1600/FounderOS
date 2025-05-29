@@ -11,7 +11,10 @@ export default function ChatWidget() {
 
   useEffect(() => {
     let id = localStorage.getItem('session_id');
-    if (!id) {
+    if (!input.trim() || input.trim().length < 5) {
+  alert('Por favor, descreva melhor o problema.');
+  return;
+}
       id = uuidv4();
       localStorage.setItem('session_id', id);
     }
