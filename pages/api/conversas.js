@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const token = req.headers['x-dashboard-secret'];
+  const token = req.headers['capri123'];
   if (token !== process.env.NEXT_PUBLIC_DASHBOARD_SECRET) {
     return res.status(401).json({ error: 'Não autorizado' });
   }
