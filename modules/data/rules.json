@@ -1,28 +1,152 @@
-
 [
   {
-    "categoria": "atendimento",
-    "regra": "Responder sempre com empatia. Nunca usar jargão técnico com o cliente final.",
-    "exemplo": "Em vez de 'remover swirls e hologramas', usar 'tirar os riscos que aparecem ao sol'."
+    "categoria": "educacao_linguistica",
+    "regras": [
+      {
+        "condicao": "mensagem contém erros ortográficos comuns",
+        "acao": "corrigir automaticamente"
+      },
+      {
+        "condicao": "uso de termos técnicos",
+        "acao": "traduzir para linguagem simples"
+      },
+      {
+        "condicao": "linguagem demasiado informal ou gírias",
+        "acao": "ajustar para tom profissional mas acessível"
+      }
+    ]
   },
   {
-    "categoria": "preço",
-    "regra": "Não comunicar preços fixos sem usar o simulador ou ter detalhes do estado do carro.",
-    "exemplo": "Evitar dizer 'isso custa 250€', e dizer 'pode variar entre 200€ e 400€ dependendo do estado da pintura'."
+    "categoria": "urgencia",
+    "regras": [
+      {
+        "condicao": "cliente menciona pressa, urgência ou prazo apertado",
+        "acao": "responder com prioridade e sugerir marcação imediata"
+      }
+    ]
   },
   {
-    "categoria": "vendas",
-    "regra": "Promover sempre a TAMAI Premium primeiro. TAMAI Express é alternativa quando há resistência ao preço.",
-    "exemplo": "Se o cliente disser que só quer algo básico, sugerir Express como opção com excelente relação preço/benefício."
+    "categoria": "comparacao_concorrencia",
+    "regras": [
+      {
+        "condicao": "cliente refere outra empresa ou concorrente",
+        "acao": "destacar diferenciais TAMAI como qualidade, garantia e detalhe"
+      }
+    ]
   },
   {
-    "categoria": "upsell",
-    "regra": "Oferecer upgrade se o valor ultrapassar 300€.",
-    "exemplo": "Se a pintura for 320€, sugerir carro de substituição gratuito como bónus."
+    "categoria": "duvidas_frequentes",
+    "regras": [
+      {
+        "condicao": "cliente pergunta sobre garantias, prazos ou produtos",
+        "acao": "responder com texto padrão + link para explicações ou imagens"
+      }
+    ]
   },
   {
-    "categoria": "linguagem",
-    "regra": "Usar sempre linguagem positiva e ativa. Nunca dizer que 'não fazemos', mas sim o que fazemos melhor.",
-    "exemplo": "Em vez de 'não removemos bancos', dizer 'trabalhamos com o banco montado para segurança e eficiência'."
+    "categoria": "upsell_inteligente",
+    "regras": [
+      {
+        "condicao": "cliente menciona serviço base (ex: polimento)",
+        "acao": "sugerir serviço complementar (ex: proteção cerâmica, carro de substituição)"
+      }
+    ]
+  },
+  {
+    "categoria": "objeções",
+    "regras": [
+      {
+        "condicao": "cliente menciona preço alto",
+        "acao": "responder com empatia e reforçar o valor e durabilidade do serviço"
+      },
+      {
+        "condicao": "cliente menciona falta de tempo",
+        "acao": "sugerir carro de substituição ou recolha gratuita"
+      },
+      {
+        "condicao": "cliente menciona distância",
+        "acao": "indicar recolha e entrega incluídas em Lisboa"
+      }
+    ]
+  },
+  {
+    "categoria": "segmentacao_publico",
+    "regras": [
+      {
+        "condicao": "pedido indica serviço rápido ou económico",
+        "acao": "associar a Tamai Express"
+      },
+      {
+        "condicao": "pedido indica serviço completo ou detalhado",
+        "acao": "associar à linha Tamai Premium"
+      }
+    ]
+  },
+  {
+    "categoria": "saudacao_tom",
+    "regras": [
+      {
+        "condicao": "início de conversa",
+        "acao": "usar saudação empática e humanizada com emoji"
+      },
+      {
+        "condicao": "linguagem robótica",
+        "acao": "ajustar para tom informal-profissional"
+      }
+    ]
+  },
+  {
+    "categoria": "oferta_progressiva",
+    "regras": [
+      {
+        "condicao": "orçamento > 500€",
+        "acao": "oferecer carro de substituição ou desconto de 10%"
+      }
+    ]
+  },
+  {
+    "categoria": "followup_automatico",
+    "regras": [
+      {
+        "condicao": "cliente não responde após 4 horas",
+        "acao": "enviar mensagem de seguimento"
+      }
+    ]
+  },
+  {
+    "categoria": "protecao_marca",
+    "regras": [
+      {
+        "condicao": "cliente critica concorrência",
+        "acao": "manter tom neutro e reforçar valores TAMAI com provas sociais"
+      }
+    ]
+  },
+  {
+    "categoria": "estilo_consistente",
+    "regras": [
+      {
+        "condicao": "mensagem com muitos emojis ou frases longas",
+        "acao": "limitar emojis e reduzir para frases curtas"
+      },
+      {
+        "condicao": "mensagem descritiva",
+        "acao": "usar termos visuais como 'como novo', 'brilho', 'interior imaculado'"
+      }
+    ]
+  },
+  {
+    "categoria": "restricoes_eticas",
+    "regras": [
+      {
+        "condicao": "pedido de diagnóstico remoto",
+        "acao": "informar que é necessário ver o carro ao vivo"
+      },
+      {
+        "condicao": "pedido de prazo exato sem contexto",
+        "acao": "informar que o prazo depende de confirmação com equipa técnica"
+      }
+    ]
   }
 ]
+
