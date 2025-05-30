@@ -1,54 +1,10 @@
 [
   {
-    "categoria": "educacao_linguistica",
-    "regras": [
-      {
-        "condicao": "mensagem contém erros ortográficos comuns",
-        "acao": "corrigir automaticamente"
-      },
-      {
-        "condicao": "uso de termos técnicos",
-        "acao": "traduzir para linguagem simples"
-      },
-      {
-        "condicao": "linguagem demasiado informal ou gírias",
-        "acao": "ajustar para tom profissional mas acessível"
-      }
-    ]
-  },
-  {
     "categoria": "urgencia",
     "regras": [
       {
         "condicao": "cliente menciona pressa, urgência ou prazo apertado",
         "acao": "responder com prioridade e sugerir marcação imediata"
-      }
-    ]
-  },
-  {
-    "categoria": "comparacao_concorrencia",
-    "regras": [
-      {
-        "condicao": "cliente refere outra empresa ou concorrente",
-        "acao": "destacar diferenciais TAMAI como qualidade, garantia e detalhe"
-      }
-    ]
-  },
-  {
-    "categoria": "duvidas_frequentes",
-    "regras": [
-      {
-        "condicao": "cliente pergunta sobre garantias, prazos ou produtos",
-        "acao": "responder com texto padrão + link para explicações ou imagens"
-      }
-    ]
-  },
-  {
-    "categoria": "upsell_inteligente",
-    "regras": [
-      {
-        "condicao": "cliente menciona serviço base (ex: polimento)",
-        "acao": "sugerir serviço complementar (ex: proteção cerâmica, carro de substituição)"
       }
     ]
   },
@@ -62,91 +18,7 @@
       {
         "condicao": "cliente menciona falta de tempo",
         "acao": "sugerir carro de substituição ou recolha gratuita"
-      },
-      {
-        "condicao": "cliente menciona distância",
-        "acao": "indicar recolha e entrega incluídas em Lisboa"
-      }
-    ]
-  },
-  {
-    "categoria": "segmentacao_publico",
-    "regras": [
-      {
-        "condicao": "pedido indica serviço rápido ou económico",
-        "acao": "associar a Tamai Express"
-      },
-      {
-        "condicao": "pedido indica serviço completo ou detalhado",
-        "acao": "associar à linha Tamai Premium"
-      }
-    ]
-  },
-  {
-    "categoria": "saudacao_tom",
-    "regras": [
-      {
-        "condicao": "início de conversa",
-        "acao": "usar saudação empática e humanizada com emoji"
-      },
-      {
-        "condicao": "linguagem robótica",
-        "acao": "ajustar para tom informal-profissional"
-      }
-    ]
-  },
-  {
-    "categoria": "oferta_progressiva",
-    "regras": [
-      {
-        "condicao": "orçamento > 500€",
-        "acao": "oferecer carro de substituição ou desconto de 10%"
-      }
-    ]
-  },
-  {
-    "categoria": "followup_automatico",
-    "regras": [
-      {
-        "condicao": "cliente não responde após 4 horas",
-        "acao": "enviar mensagem de seguimento"
-      }
-    ]
-  },
-  {
-    "categoria": "protecao_marca",
-    "regras": [
-      {
-        "condicao": "cliente critica concorrência",
-        "acao": "manter tom neutro e reforçar valores TAMAI com provas sociais"
-      }
-    ]
-  },
-  {
-    "categoria": "estilo_consistente",
-    "regras": [
-      {
-        "condicao": "mensagem com muitos emojis ou frases longas",
-        "acao": "limitar emojis e reduzir para frases curtas"
-      },
-      {
-        "condicao": "mensagem descritiva",
-        "acao": "usar termos visuais como 'como novo', 'brilho', 'interior imaculado'"
-      }
-    ]
-  },
-  {
-    "categoria": "restricoes_eticas",
-    "regras": [
-      {
-        "condicao": "pedido de diagnóstico remoto",
-        "acao": "informar que é necessário ver o carro ao vivo"
-      },
-      {
-        "condicao": "pedido de prazo exato sem contexto",
-        "acao": "informar que o prazo depende de confirmação com equipa técnica"
       }
     ]
   }
 ]
-

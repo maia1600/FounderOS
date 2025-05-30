@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
+import { matchRule } from '../../modules/data/match-rule.js';
 
 // Carrega regras do ficheiro JSON
 const loadRules = () => {
@@ -42,18 +43,28 @@ export default async function handler(req, res) {
 
   try {
     // Gerar resposta com IA
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content:
-            "És um assistente da TAMAI, um centro automóvel em Portugal que oferece serviços como pintura, estofador, detalhe e restauro de plásticos. Responde de forma clara, curta e profissional. Simula preços quando possível. Nunca inventes dados técnicos.",
-        },
-        { role: "user", content: user_message },
-      ],
-      temperature: 0.7,
-    });
+// Aplica regra TAMAI com base na mensagem do cliente
+const regra = await matchRule(user_message);
+const contextoRegra = `
+Regra TAMAI mais relevante:
+- Categoria: ${regra.categoria}
+- Condição: ${regra.condicao}
+- Ação recomendada: ${regra.acao}
+`;
+
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "system",
+      content:
+        "És um assistente da TAMAI, um centro automóvel em Portugal que oferece serviços como pintura, estofador, detalhe e restauro de plásticos. Responde de forma clara, curta e profissional. Simula preços quando possível. Nunca inventes dados técnicos.",
+    },
+    { role: "user", content: `${user_message}\n\n${contextoRegra}` },
+  ],
+  temperature: 0.7,
+});
+
 
     ai_reply = completion.choices[0]?.message?.content || ai_reply;
 
