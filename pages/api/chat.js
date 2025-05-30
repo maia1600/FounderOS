@@ -60,8 +60,10 @@ export default async function handler(req, res) {
     // Aplicar regra de upsell se valor > 300€
     if (ai_reply.includes('€')) {
       const valorEncontrado = ai_reply.match(/\d+(?:[.,]\d+)?/);
-      const valor = valorEncontrado ? parseFloat(valorEncontrado[0].replace(',', '.')) : 0;
-      if (valor > 300) {
+    const numeros = ai_reply.match(/\d+/g)?.map(Number) || [];
+const maiorValor = Math.max(...numeros);
+
+if (maiorValor > 300) {
         const upsell = rules.find(r => r.categoria === 'upsell');
         if (upsell) {
           ai_reply += `\n\n💡 ${upsell.exemplo}`;
