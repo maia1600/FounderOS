@@ -52,6 +52,20 @@ res.setHeader('Access-Control-Allow-Origin', '*');
 
     ai_reply = chatCompletion.choices[0]?.message?.content || ai_reply;
 
+
+    const regras = loadRules();
+
+// Exemplo: aplicar regras de upsell se o valor for > 300€
+if (ai_reply.includes('€')) {
+  const valor = parseFloat(ai_reply.match(/\d+/)?.[0] || 0);
+  if (valor > 300) {
+    const upsell = regras.find(r => r.categoria === 'upsell');
+    if (upsell) {
+      ai_reply += `\n\n💡 ${upsell.exemplo}`;
+    }
+  }
+}
+
     const metadata = {
       categoria_servico: user_message.toLowerCase().includes("pintura") ? "pintura" : "geral",
       marca_carro: user_message.includes("Golf") ? "Volkswagen" : null,
