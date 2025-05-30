@@ -1,1 +1,28 @@
 
+[
+  {
+    "categoria": "atendimento",
+    "regra": "Responder sempre com empatia. Nunca usar jargão técnico com o cliente final.",
+    "exemplo": "Em vez de 'remover swirls e hologramas', usar 'tirar os riscos que aparecem ao sol'."
+  },
+  {
+    "categoria": "preço",
+    "regra": "Não comunicar preços fixos sem usar o simulador ou ter detalhes do estado do carro.",
+    "exemplo": "Evitar dizer 'isso custa 250€', e dizer 'pode variar entre 200€ e 400€ dependendo do estado da pintura'."
+  },
+  {
+    "categoria": "vendas",
+    "regra": "Promover sempre a TAMAI Premium primeiro. TAMAI Express é alternativa quando há resistência ao preço.",
+    "exemplo": "Se o cliente disser que só quer algo básico, sugerir Express como opção com excelente relação preço/benefício."
+  },
+  {
+    "categoria": "upsell",
+    "regra": "Oferecer upgrade se o valor ultrapassar 300€.",
+    "exemplo": "Se a pintura for 320€, sugerir carro de substituição gratuito como bónus."
+  },
+  {
+    "categoria": "linguagem",
+    "regra": "Usar sempre linguagem positiva e ativa. Nunca dizer que 'não fazemos', mas sim o que fazemos melhor.",
+    "exemplo": "Em vez de 'não removemos bancos', dizer 'trabalhamos com o banco montado para segurança e eficiência'."
+  }
+]
