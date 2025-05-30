@@ -8,9 +8,15 @@ const openai = new OpenAI({
 });
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  // Permitir CORS (origens externas como tamai.pt)
+if (req.method === 'OPTIONS') {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.status(200).end();
+}
+
+res.setHeader('Access-Control-Allow-Origin', '*');
 
   const { session_id, user_message, source_page } = req.body;
 
