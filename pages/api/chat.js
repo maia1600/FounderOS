@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const loadRules = () => {
-  const filePath = path.join(process.cwd(), 'data', 'rules.json');
+  const filePath = path.join(process.cwd(), 'modules', 'data', 'rules.json');
   const fileData = fs.readFileSync(filePath, 'utf-8');
   return JSON.parse(fileData);
 };
