@@ -1,6 +1,13 @@
 import { Pool } from 'pg';
 import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
 
+const loadRules = () => {
+  const filePath = path.join(process.cwd(), 'data', 'rules.json');
+  const fileData = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(fileData);
+};
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const openai = new OpenAI({
