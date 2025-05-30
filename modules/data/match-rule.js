@@ -1,7 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import OpenAI from 'openai';
+import path from 'path';
 
+const embeddingsPath = path.join(process.cwd(), 'modules', 'data', 'rules-embeddings.json');
 
 dotenv.config();
 
