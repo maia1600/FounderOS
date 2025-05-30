@@ -3,7 +3,7 @@ import path from 'path';
 import OpenAI from 'openai';
 
 
-const embeddingsPath = path.join(process.cwd(), 'modules', 'data', 'rules-embeddings.json');
+
 
 dotenv.config();
 
