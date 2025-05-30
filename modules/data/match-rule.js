@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import OpenAI from 'openai';
-import dotenv from 'dotenv';
+
 
 dotenv.config();
 
