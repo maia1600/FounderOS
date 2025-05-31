@@ -1,37 +1,31 @@
-// /pages/api/regras/aprovar.js
-import fs from 'fs'
-import path from 'path'
-import { regras } from '@/modules/data/rules-embeddings.mjs'
+// pages/api/regras/aprovar.js
+import { pool } from '@/lib/db'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+    return res.status(405).json({ error: 'Método não permitido' })
   }
 
-  const { condicao } = req.body
+  const { id } = req.body
 
-  if (!condicao) {
-    return res.status(400).json({ error: 'Condição é obrigatória' })
+  if (!id) {
+    return res.status(400).json({ error: 'ID da regra não fornecido' })
   }
 
   try {
-    const index = regras.findIndex(r => r.condicao === condicao && r.sugerida_por_ia)
-    if (index === -1) {
-      return res.status(404).json({ error: 'Regra sugerida não encontrada' })
+    const result = await pool.query(
+      'UPDATE regras SET ativa = true, sugerida_por_ia = false WHERE id = $1 RETURNING *',
+      [id]
+    )
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Regra não encontrada' })
     }
 
-    regras[index].ativa = true
-    delete regras[index].sugerida_por_ia
-
-    const outputPath = path.join(process.cwd(), 'modules', 'data', 'rules-embeddings.mjs')
-    const fileContent = `export const regras = ${JSON.stringify(regras, null, 2)}\n`
-
-    fs.writeFileSync(outputPath, fileContent, 'utf-8')
-
-    return res.status(200).json({ message: 'Regra aprovada com sucesso' })
+    return res.status(200).json({ mensagem: 'Regra aprovada com sucesso', regra: result.rows[0] })
   } catch (error) {
     console.error('Erro ao aprovar regra:', error)
-    return res.status(500).json({ error: 'Erro ao aprovar regra' })
+    return res.status(500).json({ error: 'Erro interno ao aprovar regra' })
   }
 }
 
