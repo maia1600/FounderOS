@@ -64,7 +64,9 @@ ${contextoRegra}` },
     if (maiorValor > 300) {
       const upsell = rules.find(r => r.categoria === 'upsell');
       if (upsell) {
-        ai_reply += `\n\n${upsell.exemplo}`;
+        ai_reply += `
+
+${upsell.exemplo}`;
       }
     }
 
