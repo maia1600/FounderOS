@@ -1,34 +1,32 @@
-import { regras } from './rules-embeddings.mjs';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// Cálculo de similaridade cosseno
-function cosineSimilarity(a, b) {
-  const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
-  const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-  const magB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
-  return dot / (magA * magB);
-}
-
-// Função principal de correspondência
-export async function matchRule(userMessage) {
-  const response = await openai.embeddings.create({
-    model: "text-embedding-ada-002",
-    input: userMessage
-  });
-
-  const inputEmbedding = response.data[0].embedding;
-
-  const resultados = regras.map(regra => {
-    return {
-      categoria: regra.categoria,
-      condicao: regra.condicao,
-      acao: regra.acao,
-      score: cosineSimilarity(inputEmbedding, regra.embedding)
-    };
-  });
-
-  const melhor = resultados.sort((a, b) => b.score - a.score)[0];
-  return melhor;
-}
+[
+  {
+    "categoria": "urgencia",
+    "condicao": "cliente menciona pressa, urg\u00eancia ou prazo apertado",
+    "acao": "responder com prioridade e sugerir marca\u00e7\u00e3o imediata",
+    "embedding": [
+      0.12,
+      0.23,
+      0.34
+    ]
+  },
+  {
+    "categoria": "obje\u00e7\u00f5es",
+    "condicao": "cliente menciona pre\u00e7o alto",
+    "acao": "responder com empatia e refor\u00e7ar o valor e durabilidade do servi\u00e7o",
+    "embedding": [
+      0.45,
+      0.56,
+      0.67
+    ]
+  },
+  {
+    "categoria": "obje\u00e7\u00f5es",
+    "condicao": "cliente menciona falta de tempo",
+    "acao": "sugerir carro de substitui\u00e7\u00e3o ou recolha gratuita",
+    "embedding": [
+      0.78,
+      0.89,
+      0.91
+    ]
+  }
+]
