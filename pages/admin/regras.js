@@ -1,6 +1,6 @@
 // pages/admin/regras.js
 import { useEffect, useState } from 'react'
-import AprovarRegraButton from '@/modules/components/Regras/AprovarRegraButton'
+import AprovarRegraButton from '/modules/components/Regras/AprovarRegraButton'
 
 export default function PainelRegras() {
   const [regras, setRegras] = useState([])
