@@ -90,4 +90,4 @@ ${contextoRegra}` },
     console.error("Erro ao processar com IA:", error.message);
     return res.status(500).json({ error: 'Erro ao gerar resposta com IA' });
   }
-}
+
