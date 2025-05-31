@@ -1,33 +1,39 @@
-
 // /pages/api/regras/editar.js
 import { pool } from '@/lib/db'
 
 export default async function handler(req, res) {
-  if (req.method !== 'PATCH') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' })
   }
 
-  const { id, categoria, condicao, acao, exemplo } = req.body
+  const { id, categoria, condicao, acao, exemplo, embedding } = req.body
 
   if (!id || !categoria || !condicao || !acao) {
-    return res.status(400).json({ error: 'Campos obrigatórios em falta' })
+    return res.status(400).json({ error: 'Dados obrigatórios em falta' })
   }
 
   try {
-    const updateQuery = `
+    const query = `
       UPDATE regras
       SET categoria = $1,
           condicao = $2,
           acao = $3,
-          exemplo = $4
-      WHERE id = $5
+          exemplo = $4,
+          embedding = $5
+      WHERE id = $6
+      RETURNING *
     `
 
-    await pool.query(updateQuery, [categoria, condicao, acao, exemplo || null, id])
+    const values = [categoria, condicao, acao, exemplo || null, embedding || null, id]
+    const result = await pool.query(query, values)
 
-    res.status(200).json({ sucesso: true, mensagem: 'Regra atualizada com sucesso' })
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Regra não encontrada' })
+    }
+
+    res.status(200).json({ sucesso: true, regra: result.rows[0] })
   } catch (error) {
     console.error('Erro ao editar regra:', error)
-    res.status(500).json({ error: 'Erro ao editar regra', detalhe: error.message })
+    res.status(500).json({ error: 'Erro interno ao editar regra', detalhe: error.message })
   }
 }
