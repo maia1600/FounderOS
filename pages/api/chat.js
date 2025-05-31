@@ -1,7 +1,10 @@
 import { Pool } from 'pg';
 import OpenAI from 'openai';
+
+
 import { matchRule } from '../../modules/data/match-rule.js';
-import { rules } from '../../modules/data/rules.js';
+import { regras as rules } from '../../modules/data/rules-embeddings.mjs';
+
 
 // Conexão à base de dados
 const pool = new Pool({
