@@ -3,7 +3,6 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Cálculo de similaridade cosseno
 function cosineSimilarity(a, b) {
   const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
   const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
@@ -11,7 +10,6 @@ function cosineSimilarity(a, b) {
   return dot / (magA * magB);
 }
 
-// Função principal de correspondência
 export async function matchRule(userMessage) {
   const response = await openai.embeddings.create({
     model: "text-embedding-ada-002",
@@ -20,16 +18,11 @@ export async function matchRule(userMessage) {
 
   const inputEmbedding = response.data[0].embedding;
 
-  const resultados = regras.map(regra => {
-    return {
-      categoria: regra.categoria,
-      condicao: regra.condicao,
-      acao: regra.acao,
-      score: cosineSimilarity(inputEmbedding, regra.embedding)
-    };
-  });
+  const resultados = regras.map(regra => ({
+    ...regra,
+    score: cosineSimilarity(inputEmbedding, regra.embedding)
+  }));
 
-  const melhor = resultados.sort((a, b) => b.score - a.score)[0];
-  return melhor;
+  return resultados.sort((a, b) => b.score - a.score)[0];
 }
 
