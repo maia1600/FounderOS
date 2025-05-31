@@ -1,7 +1,7 @@
 // /pages/api/regras/aprovar.js
 import fs from 'fs'
 import path from 'path'
-import { regras } from '/modules/data/rules-embeddings.mjs'
+import { regras } from '@/modules/data/rules-embeddings.mjs'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -27,5 +27,4 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ success: true })
 }
-
 
