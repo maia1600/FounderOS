@@ -1,52 +1,54 @@
 // /pages/admin/regras.js
 import { useEffect, useState } from 'react'
+import AprovarRegraButton from '@/modules/components/Regras/AprovarRegraButton'
 
 export default function PainelRegras() {
   const [regras, setRegras] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [mensagem, setMensagem] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetch('/api/regras?filtro=sugestoes')
-      .then(res => res.json())
-      .then(setRegras)
-  }, [])
-
-  async function aprovar(id) {
+  const fetchRegras = async () => {
     setLoading(true)
-    setMensagem('')
-    try {
-      const res = await fetch('/api/regras/aprovar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erro desconhecido')
-
-      setMensagem('✅ Regra aprovada com sucesso!')
-      setRegras(r => r.filter(regra => regra.id !== id))
-    } catch (err) {
-      setMensagem('❌ ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+    const res = await fetch('/api/regras?sugestoes')
+    const data = await res.json()
+    setRegras(data)
+    setLoading(false)
   }
 
+  useEffect(() => {
+    fetchRegras()
+  }, [])
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Sugestões de Regras por IA</h1>
-      {mensagem && <p>{mensagem}</p>}
-      {regras.length === 0 && <p>Sem sugestões por aprovar.</p>}
-      <ul>
-        {regras.map(r => (
-          <li key={r.id} style={{ margin: '1rem 0' }}>
-            <strong>{r.categoria}</strong>: {r.condicao} → <em>{r.acao}</em>
-            <br />
-            <button onClick={() => aprovar(r.id)} disabled={loading}>Aprovar</button>
-          </li>
-        ))}
-      </ul>
+    <div className="p-6">
+      <h1 className="text-xl font-bold mb-4">Sugestões da IA</h1>
+      {loading ? (
+        <p>A carregar...</p>
+      ) : regras.length === 0 ? (
+        <p>Sem sugestões de momento.</p>
+      ) : (
+        <table className="w-full border text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-2 text-left">Categoria</th>
+              <th className="p-2 text-left">Condição</th>
+              <th className="p-2 text-left">Ação</th>
+              <th className="p-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {regras.map((r, idx) => (
+              <tr key={idx} className="border-t">
+                <td className="p-2">{r.categoria}</td>
+                <td className="p-2">{r.condicao}</td>
+                <td className="p-2">{r.acao}</td>
+                <td className="p-2">
+                  <AprovarRegraButton regraId={r.id} onSuccess={fetchRegras} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   )
 }
