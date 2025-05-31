@@ -91,8 +91,7 @@ await pool.query(
     metadata.categoria_servico,
     metadata.marca_carro,
     metadata.modelo_carro,
-    metadata.ano_carro
+    metadata.ano_carro // ✅ aqui sem vírgula
   ]
 );
-
 
