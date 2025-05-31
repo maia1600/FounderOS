@@ -1,65 +1,53 @@
+// /pages/admin/regras.js
+import { useEffect, useState } from 'react'
 
-// Layout simplificado do Dashboard de Regras TAMAI (React + Tailwind + shadcn/ui)
-
-import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
-
-export default function DashboardRegras() {
+export default function PainelRegras() {
   const [regras, setRegras] = useState([])
-  const [filtro, setFiltro] = useState("ativas")
+  const [loading, setLoading] = useState(false)
+  const [mensagem, setMensagem] = useState('')
 
   useEffect(() => {
-    fetch(`/api/regras?filtro=${filtro}`)
-      .then((res) => res.json())
+    fetch('/api/regras?filtro=sugestoes')
+      .then(res => res.json())
       .then(setRegras)
-  }, [filtro])
+  }, [])
 
-  const aprovarSugestao = async (id) => {
-    await fetch(`/api/regras/aprovar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    })
-    setRegras((prev) => prev.filter((r) => r.id !== id))
+  async function aprovar(id) {
+    setLoading(true)
+    setMensagem('')
+    try {
+      const res = await fetch('/api/regras/aprovar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro desconhecido')
+
+      setMensagem('✅ Regra aprovada com sucesso!')
+      setRegras(r => r.filter(regra => regra.id !== id))
+    } catch (err) {
+      setMensagem('❌ ' + err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Painel de Regras TAMAI</h1>
-
-      <Tabs defaultValue="ativas" onValueChange={setFiltro}>
-        <TabsList>
-          <TabsTrigger value="ativas">Regras Ativas</TabsTrigger>
-          <TabsTrigger value="sugestoes">Sugestões da IA</TabsTrigger>
-          <TabsTrigger value="todas">Todas</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        {regras.map((r) => (
-          <Card key={r.id}>
-            <CardContent className="space-y-2 p-4">
-              <div className="text-sm text-muted-foreground">Categoria: {r.categoria}</div>
-              <div className="font-semibold">Condição: {r.condicao}</div>
-              <div className="">Ação: {r.acao}</div>
-              {r.exemplo && <div className="text-sm italic">Ex: {r.exemplo}</div>}
-
-              {filtro === "sugestoes" ? (
-                <Button onClick={() => aprovarSugestao(r.id)}>✅ Aprovar e Ativar</Button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span>Ativa</span>
-                  <Switch defaultChecked={r.ativa} />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+    <div style={{ padding: '2rem' }}>
+      <h1>Sugestões de Regras por IA</h1>
+      {mensagem && <p>{mensagem}</p>}
+      {regras.length === 0 && <p>Sem sugestões por aprovar.</p>}
+      <ul>
+        {regras.map(r => (
+          <li key={r.id} style={{ margin: '1rem 0' }}>
+            <strong>{r.categoria}</strong>: {r.condicao} → <em>{r.acao}</em>
+            <br />
+            <button onClick={() => aprovar(r.id)} disabled={loading}>Aprovar</button>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   )
 }
+
