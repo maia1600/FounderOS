@@ -64,34 +64,31 @@ ${contextoRegra}` },
     const maiorValor = Math.max(...numeros);
     if (maiorValor > 300) {
       const upsell = rules.find(r => r.categoria === 'upsell');
-      if (upsell) {
-        ai_reply += `
+    if (upsell) {
+  ai_reply += `\n\n💡 ${upsell.exemplo}`;
+}
 
-${upsell.exemplo}`;
-      }
-    }
+  await pool.query(
+    `INSERT INTO conversations 
+      (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [
+      session_id,
+      user_message,
+      ai_reply,
+      source_page || null,
+      metadata.categoria_servico,
+      metadata.marca_carro,
+      metadata.modelo_carro,
+      metadata.ano_carro
+    ]
+  );
 
-    // Extrair metadados simples
-    const metadata = {
-      categoria_servico: user_message.toLowerCase().includes("pintura") ? "pintura" : "geral",
-      marca_carro: user_message.match(/(Volkswagen|BMW|Renault|Mercedes|Audi|Toyota)/i)?.[0] || null,
-      modelo_carro: user_message.match(/\b(Golf|Clio|Yaris|A3|Civic)\b/i)?.[0] || null,
-      ano_carro: user_message.match(/\b(19|20)\d{2}\b/)?.[0] || null,
-    };
+  return res.status(200).json({ response: ai_reply, metadata });
 
-await pool.query(
-  `INSERT INTO conversations 
-    (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-  [
-    session_id,
-    user_message,
-    ai_reply,
-    source_page || null,
-    metadata.categoria_servico,
-    metadata.marca_carro,
-    metadata.modelo_carro,
-    metadata.ano_carro 
-  ]
-);  }
+} catch (error) {
+  console.error("Erro ao processar com IA:", error.message);
+  return res.status(500).json({ error: 'Erro ao gerar resposta com IA' });
+}
 
+} // <-- aqui fecha a função handler()
