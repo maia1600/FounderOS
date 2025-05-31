@@ -59,7 +59,9 @@ ${contextoRegra}` },
     ai_reply = completion.choices[0]?.message?.content || ai_reply;
 
     // Verifica se deve aplicar upsell
-    const numeros = ai_reply.match(/\d+/g)?.map(Number) || [];
+  const numeros = ai_reply.match(/\d+/g)?.map(Number) || [];
+
+  
     const maiorValor = Math.max(...numeros);
     if (maiorValor > 300) {
       const upsell = rules.find(r => r.categoria === 'upsell');
