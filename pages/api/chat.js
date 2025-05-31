@@ -84,11 +84,10 @@ ${contextoRegra}` },
     ]
   );
 
-  return res.status(200).json({ response: ai_reply, metadata });
+    return res.status(200).json({ response: ai_reply, metadata });
 
-} catch (error) {
-  console.error("Erro ao processar com IA:", error.message);
-  return res.status(500).json({ error: 'Erro ao gerar resposta com IA' });
+  } catch (error) {
+    console.error("Erro ao processar com IA:", error.message);
+    return res.status(500).json({ error: 'Erro ao gerar resposta com IA' });
+  }
 }
-
-} // <-- aqui fecha a função handler()
