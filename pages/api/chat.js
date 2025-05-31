@@ -82,7 +82,7 @@ ${upsell.exemplo}`;
     // Gravar na base de dados
 await pool.query(
   `INSERT INTO conversations 
-    (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
+   (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
   [
     session_id,
@@ -94,6 +94,6 @@ await pool.query(
     metadata.modelo_carro,
     metadata.ano_carro,
   ]
-);
+); // <---- esta linha termina com ponto e vírgula
 
 
