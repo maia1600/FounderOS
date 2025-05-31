@@ -1,16 +1,9 @@
-import fs from 'fs';
-import path from 'path';
+import { regras } from './rules-embeddings.mjs';
 import OpenAI from 'openai';
 
-
-
-
-dotenv.config();
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const embeddingsPath = path.join(process.cwd(), 'modules', 'data', 'rules-embeddings.json');
-const regras = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
 
+// Cálculo de similaridade cosseno
 function cosineSimilarity(a, b) {
   const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
   const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
@@ -18,6 +11,7 @@ function cosineSimilarity(a, b) {
   return dot / (magA * magB);
 }
 
+// Função principal de correspondência
 export async function matchRule(userMessage) {
   const response = await openai.embeddings.create({
     model: "text-embedding-ada-002",
@@ -38,3 +32,4 @@ export async function matchRule(userMessage) {
   const melhor = resultados.sort((a, b) => b.score - a.score)[0];
   return melhor;
 }
+
