@@ -4636,9 +4636,5 @@ export const regras = [
     "acao": "oferecer carro de substituição gratuito acima de 500€",
     "exemplo": "Aproveite a campanha de Maio: carro de substituição incluído para orçamentos acima de 500€!",
     "embedding": [
-      ...
-    ]
-  },
-  ...
+  }
 ];
-
