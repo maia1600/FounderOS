@@ -48,8 +48,37 @@ export default async function handler(req, res) {
       console.error('Erro ao editar regra:', error)
       res.status(500).json({ error: 'Erro ao editar regra', detalhe: error.message })
     }
+  } else if (req.method === 'POST') {
+    const { id } = req.body
+
+    if (!id) {
+      return res.status(400).json({ error: 'ID da regra ausente para aprovação' })
+    }
+
+    try {
+      await pool.query('UPDATE regras SET ativa = true WHERE id = $1', [id])
+      res.status(200).json({ mensagem: 'Regra aprovada com sucesso' })
+    } catch (error) {
+      console.error('Erro ao aprovar regra:', error)
+      res.status(500).json({ error: 'Erro ao aprovar regra', detalhe: error.message })
+    }
+  } else if (req.method === 'DELETE') {
+    const { id } = req.body
+
+    if (!id) {
+      return res.status(400).json({ error: 'ID da regra ausente para rejeição' })
+    }
+
+    try {
+      await pool.query('DELETE FROM regras WHERE id = $1', [id])
+      res.status(200).json({ mensagem: 'Regra rejeitada com sucesso' })
+    } catch (error) {
+      console.error('Erro ao rejeitar regra:', error)
+      res.status(500).json({ error: 'Erro ao rejeitar regra', detalhe: error.message })
+    }
   } else {
-    res.setHeader('Allow', ['GET', 'PUT'])
+    res.setHeader('Allow', ['GET', 'PUT', 'POST', 'DELETE'])
     res.status(405).end(`Método ${req.method} não permitido`)
   }
 }
+
