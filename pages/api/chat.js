@@ -60,8 +60,7 @@ ${contextoRegra}` },
 
     // Verifica se deve aplicar upsell
   const numeros = ai_reply.match(/\d+/g)?.map(Number) || [];
-
-  
+ 
     const maiorValor = Math.max(...numeros);
     if (maiorValor > 300) {
       const upsell = rules.find(r => r.categoria === 'upsell');
@@ -81,27 +80,20 @@ ${upsell.exemplo}`;
     };
 
     // Gravar na base de dados
-    await pool.query(
-      \`INSERT INTO conversations 
-        (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\`,
-      [
-        session_id,
-        user_message,
-        ai_reply,
-        source_page || null,
-        metadata.categoria_servico,
-        metadata.marca_carro,
-        metadata.modelo_carro,
-        metadata.ano_carro,
-      ]
-    );
-
-    return res.status(200).json({ response: ai_reply, metadata });
-  } catch (error) {
-    console.error("Erro ao processar com IA:", error.message);
-    return res.status(500).json({ error: 'Erro ao gerar resposta com IA' });
-  }
-}
+await pool.query(
+  `INSERT INTO conversations 
+    (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+  [
+    session_id,
+    user_message,
+    ai_reply,
+    source_page || null,
+    metadata.categoria_servico,
+    metadata.marca_carro,
+    metadata.modelo_carro,
+    metadata.ano_carro,
+  ]
+);
 
 
