@@ -1,13 +1,9 @@
 // /pages/api/chat.js
 import { Pool } from 'pg';
 import OpenAI from 'openai';
-import path from 'path';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// ✅ Importar regras do módulo JS (server-friendly)
-import rules from '/modules/data/rules';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://tamai.pt');
@@ -25,13 +21,17 @@ export default async function handler(req, res) {
   if (!user_message) return res.status(400).json({ error: 'Mensagem do utilizador em falta.' });
 
   try {
+    const regrasExistentes = await carregarRegrasAprovadas();
+    const regrasFormatadas = regrasExistentes.map(r =>
+      `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`
+    ).join('\n\n');
+
+    const systemPrompt = `Responde como assistente da TAMAI. Se possível, usa ou extrai regras de negócio neste formato:\n\nCategoria: [categoria]\nCondição: [condição]\nAção: [ação]\nExemplo: [exemplo, se aplicável]\n\nRegras já existentes:\n${regrasFormatadas}\n\nEvita explicações longas.`;
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        {
-          role: 'system',
-          content: `Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis exatamente neste formato (usa pontuação e quebras de linha claras):\n\nCategoria: [categoria]\nCondição: [condição]\nAção: [ação]\nExemplo: [exemplo, se aplicável]\n\nEvita explicações longas.`
-        },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: user_message }
       ],
       temperature: 0.4
@@ -51,6 +51,18 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Erro no chat:', err);
     return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
+  }
+}
+
+async function carregarRegrasAprovadas() {
+  try {
+    const result = await pool.query(
+      `SELECT categoria, condicao, acao, exemplo FROM regras WHERE ativa = true AND aprovada = true`
+    );
+    return result.rows;
+  } catch (err) {
+    console.error('Erro ao carregar regras existentes:', err);
+    return [];
   }
 }
 
