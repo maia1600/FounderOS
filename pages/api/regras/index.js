@@ -1,41 +1,64 @@
-import fs from 'fs';
-import path from 'path';
+import { Client } from 'pg';
 
-const filePath = path.join(process.cwd(), 'modules', 'data', 'rules.json');
+export default async function handler(req, res) {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }, // necessário para o Neon
+  });
 
-export default function handler(req, res) {
-  const raw = fs.readFileSync(filePath, 'utf-8');
-  const regras = JSON.parse(raw);
+  await client.connect();
 
   if (req.method === 'GET') {
-    return res.status(200).json(regras);
+    try {
+      const result = await client.query('SELECT * FROM regras ORDER BY id DESC');
+      await client.end();
+      return res.status(200).json(result.rows);
+    } catch (error) {
+      await client.end();
+      return res.status(500).json({ error: 'Erro ao obter regras.' });
+    }
   }
 
   if (req.method === 'POST') {
     const { id } = req.body;
-    const index = regras.findIndex((r) => r.id === id);
-    if (index !== -1) regras[index].aprovada = true;
-    fs.writeFileSync(filePath, JSON.stringify(regras, null, 2));
-    return res.status(200).json({ success: true });
+    try {
+      await client.query('UPDATE regras SET aprovada = true WHERE id = $1', [id]);
+      await client.end();
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      await client.end();
+      return res.status(500).json({ error: 'Erro ao aprovar regra.' });
+    }
   }
 
   if (req.method === 'DELETE') {
     const { id } = req.body;
-    const novas = regras.filter((r) => r.id !== id);
-    fs.writeFileSync(filePath, JSON.stringify(novas, null, 2));
-    return res.status(200).json({ success: true });
+    try {
+      await client.query('DELETE FROM regras WHERE id = $1', [id]);
+      await client.end();
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      await client.end();
+      return res.status(500).json({ error: 'Erro ao eliminar regra.' });
+    }
   }
 
   if (req.method === 'PUT') {
     const { id, categoria, condicao, acao, exemplo } = req.body;
-    const index = regras.findIndex((r) => r.id === id);
-    if (index === -1) return res.status(404).json({ error: 'Regra não encontrada' });
-
-    regras[index] = { ...regras[index], categoria, condicao, acao, exemplo };
-    fs.writeFileSync(filePath, JSON.stringify(regras, null, 2));
-    return res.status(200).json({ success: true });
+    try {
+      await client.query(
+        'UPDATE regras SET categoria = $1, condicao = $2, acao = $3, exemplo = $4 WHERE id = $5',
+        [categoria, condicao, acao, exemplo, id]
+      );
+      await client.end();
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      await client.end();
+      return res.status(500).json({ error: 'Erro ao editar regra.' });
+    }
   }
 
+  await client.end();
   return res.status(405).end();
 }
 
