@@ -1,19 +1,16 @@
+// /pages/api/chat.js
 import { Pool } from 'pg';
 import OpenAI from 'openai';
-import fs from 'fs';
 import path from 'path';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
+// ⚠️ Usamos import dinâmico para ler rules.js como módulo
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const loadRules = () => {
-  const filePath = path.join(process.cwd(), 'modules', 'data', 'rules.json');
-  const fileData = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(fileData);
+const loadRules = async () => {
+  const { default: rules } = await import(path.resolve(process.cwd(), 'modules/data/rules.js'));
+  return rules;
 };
 
 export default async function handler(req, res) {
@@ -29,26 +26,20 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).end();
 
+  const { user_message, session_id, source_page } = req.body;
+
+  if (!user_message) return res.status(400).json({ error: 'Mensagem do utilizador em falta.' });
+
   try {
-    const { user_message, session_id, source_page } = req.body;
-
-    if (!user_message) {
-      return res.status(400).json({ error: 'Mensagem do utilizador em falta.' });
-    }
-
-    const rules = loadRules();
+    const rules = await loadRules();
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        {
-          role: 'system',
-          content:
-            'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis no seguinte formato: categoria: ..., condicao: ..., acao: ..., exemplo: ...',
-        },
-        { role: 'user', content: user_message },
+        { role: 'system', content: 'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis no seguinte formato: categoria: ..., condicao: ..., acao: ..., exemplo: ...' },
+        { role: 'user', content: user_message }
       ],
-      temperature: 0.4,
+      temperature: 0.4
     });
 
     const ai_response = completion.choices[0].message.content;
@@ -72,8 +63,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   try {
     console.log('[DEBUG] Resposta do AI:', resposta);
 
-    const regex =
-      /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
+    const regex = /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
     const match = resposta.match(regex);
 
     if (!match) {
@@ -97,14 +87,12 @@ async function sugerirRegraAPartirDaResposta(resposta) {
       [categoria, condicao, acao, exemplo]
     );
 
-    console.log('[INFO] Regra sugerida com sucesso:', {
-      categoria,
-      condicao,
-      acao,
-      exemplo,
-    });
+    console.log('[INFO] Regra sugerida com sucesso:', { categoria, condicao, acao, exemplo });
   } catch (err) {
     console.error('Erro ao sugerir regra automaticamente:', err);
+  }
+}
+
   }
 }
 
