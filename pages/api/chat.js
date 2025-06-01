@@ -15,7 +15,7 @@ const loadRules = () => {
 };
 
 export default async function handler(req, res) {
-  // CORS para tamai.pt
+  // CORS para permitir chamadas a partir de tamai.pt
   res.setHeader('Access-Control-Allow-Origin', 'https://tamai.pt');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -95,3 +95,4 @@ async function sugerirRegraAPartirDaResposta(resposta) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
 }
+
