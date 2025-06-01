@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`
     ).join('\n\n');
 
-    const systemPrompt = `Responde como assistente da TAMAI. Se possível, usa ou extrai regras de negócio neste formato:\n\nCategoria: [categoria]\nCondição: [condição]\nAção: [ação]\nExemplo: [exemplo, se aplicável]\n\nRegras já existentes:\n${regrasFormatadas}\n\nEvita explicações longas.`;
+   content: `Responde como assistente da TAMAI. Se já existir uma regra de negócio aplicável, responde em linguagem natural como se estivesses a explicar a um cliente. Não mostres a regra como ficheiro técnico. Usa uma linguagem clara e natural, mas coerente com a política da empresa. As regras aprovadas são:\n\n${regrasFormatadas}\n\nSe não houver uma regra aplicável, propõe uma nova nos seguintes moldes: Categoria, Condição, Ação e Exemplo.`
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
