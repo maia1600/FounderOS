@@ -2,7 +2,13 @@
 const rules = [
   {
     categoria: "upsell",
-    exemplo: "💡 Oferecemos carro de substituição gratuito para orçamentos acima de 300€."
+    regras: [
+      {
+        condicao: "cliente menciona orçamento acima de 500€",
+        acao: "oferecer carro de substituição gratuito",
+        exemplo: "Orçamentos acima de 500€ incluem carro de substituição gratuito"
+      }
+    ]
   },
   {
     categoria: "urgencia",
@@ -29,4 +35,3 @@ const rules = [
 ];
 
 export default rules;
-
