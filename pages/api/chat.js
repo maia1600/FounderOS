@@ -25,31 +25,26 @@ export default async function handler(req, res) {
   if (!user_message) return res.status(400).json({ error: 'Mensagem do utilizador em falta.' });
 
   try {
+    const regrasFormatadas = rules
+      .filter((r) => r.ativa && r.aprovada)
+      .map((r) => `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`)
+      .join('\n\n');
+
     const systemPrompt = `
-Responde como assistente da TAMAI com simpatia e profissionalismo. Usa as seguintes regras de negócio aprovadas se alguma se aplicar à pergunta do cliente. Deves sempre usar linguagem natural e fluida.
+És o assistente oficial da TAMAI. Responde sempre com simpatia, clareza e profissionalismo — e usa apenas português de Portugal.
 
-Cada regra tem esta estrutura:
-Categoria: [nome]
-Condição: [o que o cliente disse]
-Ação: [como responder ou agir]
-Exemplo: [frase ilustrativa opcional]
+Tens acesso às regras de negócio aprovadas pela TAMAI, descritas abaixo. Se alguma delas se aplicar à pergunta do cliente, deves sempre basear a tua resposta nessa regra. Adapta a linguagem para parecer natural e fluida, como se fosses humano.
 
-Regras disponíveis:
-${rules
-  .filter((r) => r.ativa && r.aprovada)
-  .map((r) => `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`)
-  .join('\n\n')}
+Se não houver nenhuma correspondência clara, responde com base na política geral da TAMAI: qualidade, confiança, transparência e foco no cliente. Não inventes regras novas.
 
-Se alguma regra se aplicar à pergunta do cliente, utiliza-a e adapta a resposta de forma amigável.
-Se não existir nenhuma regra apropriada, responde com base na política geral da TAMAI: qualidade, valor, confiança e bom atendimento.
-Nunca inventes regras que não estão acima.
+No final da tua resposta, inclui sempre a regra usada num parágrafo separado com esta estrutura exata:
+Categoria: [...]
+Condição: [...]
+Ação: [...]
+Exemplo: [...] (apenas se existir)
 
-No final da tua resposta, inclui sempre a regra utilizada (num parágrafo à parte), neste formato exato:
-Categoria: [categoria]
-Condição: [condição]
-Ação: [ação]
-Exemplo: [exemplo, se existir]
-`.trim();
+Estas são as regras disponíveis:
+${regrasFormatadas}`.trim();
 
     console.log('[DEBUG] systemPrompt aplicado ao modelo:', systemPrompt);
 
@@ -59,7 +54,7 @@ Exemplo: [exemplo, se existir]
         { role: 'system', content: systemPrompt },
         { role: 'user', content: user_message }
       ],
-      temperature: 0.4
+      temperature: 0.3
     });
 
     const ai_response = completion.choices[0].message.content;
@@ -112,6 +107,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
 }
+
 
 
 
