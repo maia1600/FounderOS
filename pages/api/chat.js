@@ -28,7 +28,10 @@ export default async function handler(req, res) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis no seguinte formato: categoria: ..., condicao: ..., acao: ..., exemplo: ...' },
+        {
+          role: 'system',
+          content: `Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis exatamente neste formato (usa pontuação e quebras de linha claras):\n\nCategoria: [categoria]\nCondição: [condição]\nAção: [ação]\nExemplo: [exemplo, se aplicável]\n\nEvita explicações longas.`
+        },
         { role: 'user', content: user_message }
       ],
       temperature: 0.4
@@ -55,7 +58,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   try {
     console.log('[DEBUG] Resposta do AI:', resposta);
 
-    const regex = /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
+    const regex = /categoria[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*condi[c\u00e7][a\u00e3]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*a[c\u00e7][a\u00e3]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)?(?:exemplo[:\-\u00e0]?\s*(.+))?/i;
     const match = resposta.match(regex);
 
     if (!match) {
