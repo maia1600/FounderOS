@@ -37,11 +37,7 @@ Tens acesso às regras de negócio aprovadas pela TAMAI, descritas abaixo. Se al
 
 Se não houver nenhuma correspondência clara, responde com base na política geral da TAMAI: qualidade, confiança, transparência e foco no cliente. Não inventes regras novas.
 
-No final da tua resposta, inclui sempre a regra usada num parágrafo separado com esta estrutura exata:
-Categoria: [...]
-Condição: [...]
-Ação: [...]
-Exemplo: [...] (apenas se existir)
+
 
 Estas são as regras disponíveis:
 ${regrasFormatadas}`.trim();
