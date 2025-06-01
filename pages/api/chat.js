@@ -7,7 +7,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejec
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ✅ Importar regras aprovadas
-import rules from '@/modules/data/rules';
+import rules from '/modules/data/rules';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://tamai.pt');
