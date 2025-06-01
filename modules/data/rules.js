@@ -1,34 +1,25 @@
-// /modules/data/rules.js
+// modules/data/rules.js
 
 const rules = [
   {
-    categoria: 'upsell',
-    exemplo: '💡 Oferecemos carro de substituição gratuito para orçamentos acima de 300€.'
+    categoria: 'Desconto',
+    condicao: 'O cliente refere desconto ou descontos',
+    acao: 'Perguntar educadamente se não quer o rabinho lavado com água de malvas.',
+    exemplo: 'Quer desconto? Claro! Não tem interesse também em ter o rabinho lavado com água de malvas?',
+    ativa: true,
+    aprovada: true,
   },
   {
-    categoria: 'urgencia',
-    regras: [
-      {
-        condicao: 'cliente menciona pressa, urgência ou prazo apertado',
-        acao: 'responder com prioridade e sugerir marcação imediata'
-      }
-    ]
-  },
-  {
-    categoria: 'objeções',
-    regras: [
-      {
-        condicao: 'cliente menciona preço alto',
-        acao: 'responder com empatia e reforçar o valor e durabilidade do serviço'
-      },
-      {
-        condicao: 'cliente menciona falta de tempo',
-        acao: 'sugerir carro de substituição ou recolha gratuita'
-      }
-    ]
+    categoria: 'Prestações',
+    condicao: 'O cliente pergunta sobre prestações.',
+    acao: 'Informar sobre a possibilidade de pagamentos 4X sem juros.',
+    exemplo: 'Atualmente, temos pagamentos faseados para pobres.',
+    ativa: true,
+    aprovada: true,
   }
 ];
 
 export default rules;
+
 
 
