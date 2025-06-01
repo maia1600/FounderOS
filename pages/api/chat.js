@@ -55,21 +55,32 @@ export default async function handler(req, res) {
 async function sugerirRegraAPartirDaResposta(resposta) {
   try {
     console.log('[DEBUG] Resposta do AI:', resposta);
-    const match = resposta.match(/categoria: (.*?), condicao: (.*?), acao: (.*?)(, exemplo: (.*))?\.?$/i);
-    if (!match || match.length < 4) return;
+
+    const regex = /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
+    const match = resposta.match(regex);
+
+    if (!match) {
+      console.log('[INFO] Nenhuma correspondência de regra encontrada.');
+      return;
+    }
 
     const categoria = match[1]?.trim();
     const condicao = match[2]?.trim();
     const acao = match[3]?.trim();
-    const exemplo = match[5]?.trim() || '';
+    const exemplo = match[4]?.trim() || '';
 
-    if (!categoria || !condicao || !acao) return;
+    if (!categoria || !condicao || !acao) {
+      console.log('[INFO] Dados insuficientes para criar regra.');
+      return;
+    }
 
     await pool.query(
       `INSERT INTO regras (categoria, condicao, acao, exemplo, ativa, aprovada, sugerida_por_ia)
        VALUES ($1, $2, $3, $4, true, false, true)`,
       [categoria, condicao, acao, exemplo]
     );
+
+    console.log('[INFO] Regra sugerida com sucesso:', { categoria, condicao, acao, exemplo });
   } catch (err) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
