@@ -10,9 +10,15 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // ✅ Ler conteúdo do ficheiro JS como texto e fazer eval seguro
 const loadRules = async () => {
   const rulesPath = path.join(process.cwd(), 'modules/data/rules.js');
-  const fileContent = await fs.readFile(rulesPath, 'utf-8');
-  const rules = eval(fileContent + '\nrules;'); // ← cuidado: só funciona se o último export for `export const rules = [...]`
-  return rules;
+  const code = await fs.readFile(rulesPath, 'utf-8');
+
+  const getRules = new Function(`
+    let rules;
+    ${code.replace('export const rules', 'rules =')}
+    return rules;
+  `);
+
+  return getRules();
 };
 
 export default async function handler(req, res) {
