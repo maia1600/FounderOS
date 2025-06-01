@@ -101,13 +101,25 @@ export default function RegraCard({ regra, onAtualizar }) {
           {regra.exemplo && (
             <><strong>Exemplo:</strong> {regra.exemplo}<br /></>
           )}
-          <strong>Estado:</strong> {regra.ativa ? 'Ativa ✅' : 'Inativa ❌'}
+          <strong>Estado:</strong> {regra.ativa ? 'Ativa ✅' : 'Inativa ❌'}<br />
+          <strong>Aprovada:</strong> {regra.aprovada ? 'Sim' : 'Não'}
         </div>
       )}
 
       {!editando && (
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button onClick={aprovar}>Aprovar</button>
-          <button
+          <button onClick={rejeitar}>Rejeitar</button>
+          <button onClick={() => setEditando(true)}>Editar</button>
+          <button onClick={eliminar}>Eliminar</button>
+          <AtivarRegraButton ativa={regra.ativa} onClick={alternarAtiva} />
+        </div>
+      )}
+
+      {mensagem && <div style={{ color: 'red', marginTop: '0.5rem' }}>{mensagem}</div>}
+    </li>
+  );
+}
+
 
 
