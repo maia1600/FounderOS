@@ -1,14 +1,13 @@
 // /pages/api/chat.js
 import { Pool } from 'pg';
 import OpenAI from 'openai';
-import path from 'path';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// ✅ Importar JS dinamicamente com `await import`
 const loadRules = async () => {
-  const { default: rules } = await import(path.resolve(process.cwd(), 'modules/data/rules.js'));
+  const rulesPath = new URL('/modules/data/rules.js', import.meta.url);
+  const { default: rules } = await import(rulesPath.href);
   return rules;
 };
 
@@ -17,11 +16,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
   const { user_message, session_id, source_page } = req.body;
