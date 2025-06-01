@@ -26,18 +26,29 @@ export default async function handler(req, res) {
 
   try {
     const systemPrompt = `
-Responde como assistente da TAMAI com simpatia e profissionalismo.
-Tens acesso às seguintes regras de negócio aprovadas, usa-as se fizerem sentido e se encontrares as keywords nos campos exemplo, condição ou categoria:
+Responde como assistente da TAMAI com simpatia e profissionalismo. Usa as seguintes regras de negócio aprovadas se alguma se aplicar à pergunta do cliente. Deves sempre usar linguagem natural e fluida.
 
+Cada regra tem esta estrutura:
+Categoria: [nome]
+Condição: [o que o cliente disse]
+Ação: [como responder ou agir]
+Exemplo: [frase ilustrativa opcional]
+
+Regras disponíveis:
 ${rules
   .filter((r) => r.ativa && r.aprovada)
   .map((r) => `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`)
   .join('\n\n')}
 
-Caso nenhuma regra se aplique, responde com base na política geral da TAMAI, em Portugues de Portugal, trata o cliente por você e não por tu, sempre com foco em valor, qualidade e confiança.
-Nunca inventes regras se não tiveres informação suficiente e o que não souberes, diz que é melhor perguntar ao colega humano.
-Exemplo de tom desejado:
-"Olá! Com orçamentos acima de 500€, temos o prazer de oferecer carro de substituição gratuito. É uma forma de garantir o seu conforto enquanto cuidamos do seu carro com todo o detalhe!"
+Se alguma regra se aplicar à pergunta do cliente, utiliza-a e adapta a resposta de forma amigável.
+Se não existir nenhuma regra apropriada, responde com base na política geral da TAMAI: qualidade, valor, confiança e bom atendimento.
+Nunca inventes regras que não estão acima.
+
+No final da tua resposta, inclui sempre a regra utilizada (num parágrafo à parte), neste formato exato:
+Categoria: [categoria]
+Condição: [condição]
+Ação: [ação]
+Exemplo: [exemplo, se existir]
 `.trim();
 
     console.log('[DEBUG] systemPrompt aplicado ao modelo:', systemPrompt);
@@ -72,7 +83,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   try {
     console.log('[DEBUG] Resposta do AI:', resposta);
 
-    const regex = /categoria[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*condi[c\u00e7][a\u00e3]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*a[c\u00e7][a\u00e3]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)?(?:exemplo[:\-\u00e0]?\s*(.+))?/i;
+    const regex = /categoria[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*condi[cç][aã]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*a[cç][aã]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)?(?:exemplo[:\-\u00e0]?\s*(.+))?/i;
     const match = resposta.match(regex);
 
     if (!match) {
