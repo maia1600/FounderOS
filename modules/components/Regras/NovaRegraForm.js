@@ -25,8 +25,8 @@ export default function NovaRegraForm({ onCriar }) {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error('Erro do servidor:', data.error || data);
-        setMensagem(data.error || 'Erro desconhecido.');
+        console.error('Erro do servidor:', data.error || data.detalhe || data);
+        setMensagem(data.detalhe || data.error || 'Erro desconhecido.');
         return;
       }
 
@@ -83,4 +83,5 @@ export default function NovaRegraForm({ onCriar }) {
     </div>
   );
 }
+
 
