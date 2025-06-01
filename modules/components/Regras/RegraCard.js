@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AtivarRegraButton from './AtivarRegraButton';
 
 export default function RegraCard({ regra, onAtualizar }) {
   const [editando, setEditando] = useState(false);
@@ -74,5 +75,49 @@ export default function RegraCard({ regra, onAtualizar }) {
             value={form.categoria}
             onChange={(e) => setForm({ ...form, categoria: e.target.value })}
           /><br />
+          <input
+            placeholder="Condição"
+            value={form.condicao}
+            onChange={(e) => setForm({ ...form, condicao: e.target.value })}
+          /><br />
+          <input
+            placeholder="Ação"
+            value={form.acao}
+            onChange={(e) => setForm({ ...form, acao: e.target.value })}
+          /><br />
+          <input
+            placeholder="Exemplo"
+            value={form.exemplo}
+            onChange={(e) => setForm({ ...form, exemplo: e.target.value })}
+          /><br />
+          <button onClick={editar}>Guardar</button>{' '}
+          <button onClick={() => setEditando(false)}>Cancelar</button>
+        </div>
+      ) : (
+        <div>
+          <strong>Categoria:</strong> {regra.categoria}<br />
+          <strong>Condição:</strong> {regra.condicao}<br />
+          <strong>Ação:</strong> {regra.acao}<br />
+          {regra.exemplo && (
+            <><strong>Exemplo:</strong> {regra.exemplo}<br /></>
+          )}
+          <strong>Estado:</strong> {regra.ativa ? 'Ativa ✅' : 'Inativa ❌'}
+        </div>
+      )}
+
+      {!editando && (
+        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button onClick={aprovar}>Aprovar</button>
+          <button onClick={rejeitar}>Rejeitar</button>
+          <button onClick={() => setEditando(true)}>Editar</button>
+          <button onClick={eliminar}>Eliminar</button>
+          <AtivarRegraButton ativa={regra.ativa} onClick={alternarAtiva} />
+        </div>
+      )}
+
+      {mensagem && <div style={{ color: 'red', marginTop: '0.5rem' }}>{mensagem}</div>}
+    </li>
+  );
+}
 
 
