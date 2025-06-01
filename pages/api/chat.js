@@ -4,21 +4,29 @@ import OpenAI from 'openai';
 import fs from 'fs/promises';
 import path from 'path';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
-// ✅ Ler conteúdo do ficheiro JS como texto e fazer eval seguro
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// ✅ Carrega rules.js como texto e executa com segurança
 const loadRules = async () => {
   const rulesPath = path.join(process.cwd(), 'modules/data/rules.js');
   const code = await fs.readFile(rulesPath, 'utf-8');
 
-  const getRules = new Function(`
-    let rules;
-    ${code.replace('export const rules', 'rules =')}
-    return rules;
-  `);
+  // remove "export const rules = " e devolve apenas o array
+  const cleanedCode = code.replace(/export\s+const\s+rules\s*=\s*/, '').trim();
 
-  return getRules();
+  // remover possível ponto e vírgula final
+  const sanitizedCode = cleanedCode.endsWith(';')
+    ? cleanedCode.slice(0, -1)
+    : cleanedCode;
+
+  return eval(`(${sanitizedCode})`);
 };
 
 export default async function handler(req, res) {
@@ -26,7 +34,11 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') return res.status(405).end();
 
   const { user_message, session_id, source_page } = req.body;
@@ -38,10 +50,14 @@ export default async function handler(req, res) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis no seguinte formato: categoria: ..., condicao: ..., acao: ..., exemplo: ...' },
-        { role: 'user', content: user_message }
+        {
+          role: 'system',
+          content:
+            'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis no seguinte formato: categoria: ..., condicao: ..., acao: ..., exemplo: ...',
+        },
+        { role: 'user', content: user_message },
       ],
-      temperature: 0.4
+      temperature: 0.4,
     });
 
     const ai_response = completion.choices[0].message.content;
@@ -54,7 +70,6 @@ export default async function handler(req, res) {
 
     await sugerirRegraAPartirDaResposta(ai_response);
     return res.status(200).json({ response: ai_response });
-
   } catch (err) {
     console.error('Erro no chat:', err);
     return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
@@ -63,7 +78,10 @@ export default async function handler(req, res) {
 
 async function sugerirRegraAPartirDaResposta(resposta) {
   try {
-    const regex = /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
+    console.log('[DEBUG] Resposta do AI:', resposta);
+
+    const regex =
+      /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
     const match = resposta.match(regex);
 
     if (!match) {
@@ -87,10 +105,16 @@ async function sugerirRegraAPartirDaResposta(resposta) {
       [categoria, condicao, acao, exemplo]
     );
 
-    console.log('[INFO] Regra sugerida com sucesso:', { categoria, condicao, acao, exemplo });
+    console.log('[INFO] Regra sugerida com sucesso:', {
+      categoria,
+      condicao,
+      acao,
+      exemplo,
+    });
   } catch (err) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
 }
+
 
 
