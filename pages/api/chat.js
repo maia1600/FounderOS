@@ -1,13 +1,15 @@
 // /pages/api/chat.js
 import { Pool } from 'pg';
 import OpenAI from 'openai';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const loadRules = async () => {
-  const rulesPath = new URL('/modules/data/rules.js', import.meta.url);
-  const { default: rules } = await import(rulesPath.href);
+  const rulesPath = path.join(process.cwd(), 'modules/data/rules.js');
+  const { default: rules } = await import(`file://${rulesPath}`);
   return rules;
 };
 
@@ -53,8 +55,6 @@ export default async function handler(req, res) {
 
 async function sugerirRegraAPartirDaResposta(resposta) {
   try {
-    console.log('[DEBUG] Resposta do AI:', resposta);
-
     const regex = /categoria:\s*(.+?),\s*condicao:\s*(.+?),\s*acao:\s*(.+?)(?:,\s*exemplo:\s*(.*))?\.?$/i;
     const match = resposta.match(regex);
 
@@ -83,6 +83,8 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   } catch (err) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
+}
+
 }
 
 
