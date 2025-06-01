@@ -1,21 +1,26 @@
+import { Client } from 'pg';
 
-import fs from 'fs';
-import path from 'path';
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { id, ativa } = req.body;
+  if (typeof ativa !== 'boolean' || !id) {
+    return res.status(400).json({ error: 'Dados inválidos.' });
+  }
 
-  const filePath = path.join(process.cwd(), 'modules', 'data', 'rules.json');
-  const raw = fs.readFileSync(filePath, 'utf-8');
-  const regras = JSON.parse(raw);
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
 
-  const index = regras.findIndex((r) => r.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Regra não encontrada' });
+  await client.connect();
 
-  regras[index].ativa = ativa;
-
-  fs.writeFileSync(filePath, JSON.stringify(regras, null, 2));
-  return res.status(200).json({ success: true });
+  try {
+    await client.query('UPDATE regras SET ativa = $1 WHERE id = $2', [ativa, id]);
+    await client.end();
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    await client.end();
+    return res.status(500).json({ error: 'Erro ao atualizar estado da regra.' });
+  }
 }
