@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis.' },
+        { role: 'system', content: 'Responde como assistente da TAMAI. Se possível, extrai regras de negócio úteis no seguinte formato: categoria: ..., condicao: ..., acao: ..., exemplo: ...' },
         { role: 'user', content: user_message }
       ],
       temperature: 0.4
@@ -53,17 +53,18 @@ export default async function handler(req, res) {
 }
 
 async function sugerirRegraAPartirDaResposta(resposta) {
-  const match = resposta.match(/categoria: (.*?), condicao: (.*?), acao: (.*?)(, exemplo: (.*))?\.?$/i);
-  if (!match) return;
-
-  const categoria = match[1]?.trim();
-  const condicao = match[2]?.trim();
-  const acao = match[3]?.trim();
-  const exemplo = match[5]?.trim() || '';
-
-  if (!categoria || !condicao || !acao) return;
-
   try {
+    console.log('[DEBUG] Resposta do AI:', resposta);
+    const match = resposta.match(/categoria: (.*?), condicao: (.*?), acao: (.*?)(, exemplo: (.*))?\.?$/i);
+    if (!match || match.length < 4) return;
+
+    const categoria = match[1]?.trim();
+    const condicao = match[2]?.trim();
+    const acao = match[3]?.trim();
+    const exemplo = match[5]?.trim() || '';
+
+    if (!categoria || !condicao || !acao) return;
+
     await pool.query(
       `INSERT INTO regras (categoria, condicao, acao, exemplo, ativa, aprovada, sugerida_por_ia)
        VALUES ($1, $2, $3, $4, true, false, true)`,
