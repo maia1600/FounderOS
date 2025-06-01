@@ -18,17 +18,17 @@ export default function RegraCard({ regra, onAtualizar }) {
       body: JSON.stringify({ id: regra.id })
     });
     if (res.ok) onAtualizar();
-    else setMensagem('Falha ao aprovar');
+    else setMensagem('Erro ao aprovar');
   };
 
   const rejeitar = async () => {
-    const res = await fetch('/api/regras', {
-      method: 'DELETE',
+    const res = await fetch('/api/regras/rejeitar', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: regra.id })
     });
     if (res.ok) onAtualizar();
-    else setMensagem('Falha ao rejeitar');
+    else setMensagem('Erro ao rejeitar');
   };
 
   const editar = async () => {
@@ -41,13 +41,13 @@ export default function RegraCard({ regra, onAtualizar }) {
       setEditando(false);
       onAtualizar();
     } else {
-      setMensagem('Falha ao editar');
+      setMensagem('Erro ao editar');
     }
   };
 
   const eliminar = async () => {
     if (!confirm('Tem a certeza que deseja eliminar esta regra?')) return;
-    const res = await fetch('/api/rules/delete', {
+    const res = await fetch('/api/regras/eliminar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: regra.id })
@@ -57,7 +57,7 @@ export default function RegraCard({ regra, onAtualizar }) {
   };
 
   const alternarAtiva = async () => {
-    const res = await fetch('/api/rules/toggleAtiva', {
+    const res = await fetch('/api/regras/alternar-ativa', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: regra.id, ativa: !regra.ativa })
@@ -108,16 +108,6 @@ export default function RegraCard({ regra, onAtualizar }) {
       {!editando && (
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button onClick={aprovar}>Aprovar</button>
-          <button onClick={rejeitar}>Rejeitar</button>
-          <button onClick={() => setEditando(true)}>Editar</button>
-          <button onClick={eliminar}>Eliminar</button>
-          <AtivarRegraButton ativa={regra.ativa} onClick={alternarAtiva} />
-        </div>
-      )}
-
-      {mensagem && <div style={{ color: 'red', marginTop: '0.5rem' }}>{mensagem}</div>}
-    </li>
-  );
-}
+          <button
 
 
