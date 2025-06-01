@@ -1,4 +1,5 @@
-export const rules = [
+// modules/data/rules.js
+const rules = [
   {
     categoria: "upsell",
     exemplo: "💡 Oferecemos carro de substituição gratuito para orçamentos acima de 300€."
@@ -26,3 +27,5 @@ export const rules = [
     ]
   }
 ];
+
+export default rules;
