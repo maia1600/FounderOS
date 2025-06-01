@@ -27,8 +27,13 @@ export default async function handler(req, res) {
     await client.end();
     return res.status(201).json({ success: true, id });
   } catch (err) {
-    console.error('Erro ao criar regra:', err); // <== esta linha é nova
+    console.error('Erro ao criar regra:', err.message, err.stack);
     await client.end();
-    return res.status(500).json({ error: 'Erro ao criar regra.' });
+    return res.status(500).json({
+      error: 'Erro ao criar regra.',
+      detalhe: err.message,
+      stack: err.stack
+    });
   }
+
 }
