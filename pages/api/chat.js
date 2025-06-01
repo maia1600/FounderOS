@@ -1,21 +1,18 @@
 // /pages/api/chat.js
 import { Pool } from 'pg';
 import OpenAI from 'openai';
-import fs from 'fs';
 import path from 'path';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const loadRules = () => {
-  const filePath = path.join(process.cwd(), 'modules', 'data', 'rules.json');
-  const fileData = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(fileData);
+// ✅ Importar JS dinamicamente com `await import`
+const loadRules = async () => {
+  const { default: rules } = await import(path.resolve(process.cwd(), 'modules/data/rules.js'));
+  return rules;
 };
 
 export default async function handler(req, res) {
-  // CORS para permitir chamadas a partir de tamai.pt
   res.setHeader('Access-Control-Allow-Origin', 'https://tamai.pt');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -28,11 +25,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { user_message, session_id, source_page } = req.body;
-
   if (!user_message) return res.status(400).json({ error: 'Mensagem do utilizador em falta.' });
 
   try {
-    const rules = loadRules();
+    const rules = await loadRules();
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -45,17 +41,15 @@ export default async function handler(req, res) {
 
     const ai_response = completion.choices[0].message.content;
 
-    // Guardar a conversa
     await pool.query(
       `INSERT INTO conversations (session_id, user_message, ai_response, source_page, timestamp)
        VALUES ($1, $2, $3, $4, NOW())`,
       [session_id, user_message, ai_response, source_page || null]
     );
 
-    // Tentar extrair regra com base na resposta do AI
     await sugerirRegraAPartirDaResposta(ai_response);
-
     return res.status(200).json({ response: ai_response });
+
   } catch (err) {
     console.error('Erro no chat:', err);
     return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
