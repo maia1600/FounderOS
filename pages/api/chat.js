@@ -1,15 +1,17 @@
 // /pages/api/chat.js
 import { Pool } from 'pg';
 import OpenAI from 'openai';
-import { promises as fs } from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// ✅ Ler conteúdo do ficheiro JS como texto e fazer eval seguro
 const loadRules = async () => {
   const rulesPath = path.join(process.cwd(), 'modules/data/rules.js');
-  const { default: rules } = await import(`file://${rulesPath}`);
+  const fileContent = await fs.readFile(rulesPath, 'utf-8');
+  const rules = eval(fileContent + '\nrules;'); // ← cuidado: só funciona se o último export for `export const rules = [...]`
   return rules;
 };
 
@@ -83,8 +85,6 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   } catch (err) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
-}
-
 }
 
 
