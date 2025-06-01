@@ -9,53 +9,78 @@ export default function NovaRegraForm({ onCriar }) {
   });
   const [mensagem, setMensagem] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const criar = async () => {
+    if (!form.categoria || !form.condicao || !form.acao) {
+      setMensagem('Preencha os campos obrigatórios.');
+      return;
+    }
 
-    const res = await fetch('/api/regras/criar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    });
+    try {
+      const res = await fetch('/api/regras/criar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
 
-    if (res.ok) {
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('Erro do servidor:', data.error || data);
+        setMensagem(data.error || 'Erro desconhecido.');
+        return;
+      }
+
       setForm({ categoria: '', condicao: '', acao: '', exemplo: '' });
       setMensagem('');
-      onCriar(); // Atualiza a lista de regras
-    } else {
-      setMensagem('Erro ao criar a regra.');
+      onCriar();
+    } catch (err) {
+      console.error('Erro na requisição:', err);
+      setMensagem(err.message || 'Erro inesperado.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h3>Nova Regra</h3>
+    <div style={{
+      border: '1px solid #ccc',
+      borderRadius: '8px',
+      padding: '1rem',
+      marginBottom: '2rem',
+      maxWidth: '480px'
+    }}>
+      <h3><strong>Nova Regra</strong></h3>
       <input
+        type="text"
         placeholder="Categoria"
         value={form.categoria}
         onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-        required
-      /><br />
+        style={{ width: '100%', marginBottom: '0.5rem' }}
+      />
       <input
+        type="text"
         placeholder="Condição"
         value={form.condicao}
         onChange={(e) => setForm({ ...form, condicao: e.target.value })}
-        required
-      /><br />
+        style={{ width: '100%', marginBottom: '0.5rem' }}
+      />
       <input
+        type="text"
         placeholder="Ação"
         value={form.acao}
         onChange={(e) => setForm({ ...form, acao: e.target.value })}
-        required
-      /><br />
+        style={{ width: '100%', marginBottom: '0.5rem' }}
+      />
       <input
+        type="text"
         placeholder="Exemplo (opcional)"
         value={form.exemplo}
         onChange={(e) => setForm({ ...form, exemplo: e.target.value })}
-      /><br />
-      <button type="submit">Criar Regra</button>
-      {mensagem && <div style={{ color: 'red', marginTop: '0.5rem' }}>{mensagem}</div>}
-    </form>
+        style={{ width: '100%', marginBottom: '0.5rem', fontStyle: 'italic' }}
+      />
+      <button onClick={criar}>Criar Regra</button>
+      {mensagem && (
+        <div style={{ color: 'red', marginTop: '0.5rem' }}>{mensagem}</div>
+      )}
+    </div>
   );
 }
 
