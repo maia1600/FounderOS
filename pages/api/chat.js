@@ -37,19 +37,34 @@ const extrairServicosDaMensagem = (mensagem, conhecimentoBase) => {
     }
   }
 
-  // ❌ Remover duplicações ou sobreposições com base em "exclui"
-  const nomesServicos = encontrados.map(s => s.nome.toLowerCase());
+  // ✅ Validação por interseção de keywords
+  const filtrados = [];
 
-  encontrados = encontrados.filter(s => {
-    if (!s.exclui || s.exclui.length === 0) return true;
-    const conflito = s.exclui.some(nome =>
-      nomesServicos.includes(nome.toLowerCase())
-    );
-    return !conflito;
-  });
+  for (const atual of encontrados) {
+    const conflitaComFiltrados = filtrados.some((outro) => {
+      if (!atual.exclui || !outro.keywords) return false;
 
-  return encontrados;
-}
+      return atual.exclui.some(excluida =>
+        outro.keywords.includes(excluida.toLowerCase())
+      );
+    });
+
+    const conflitaComAtual = filtrados.some((outro) => {
+      if (!outro.exclui || !atual.keywords) return false;
+
+      return outro.exclui.some(excluida =>
+        atual.keywords.includes(excluida.toLowerCase())
+      );
+    });
+
+    if (!conflitaComFiltrados && !conflitaComAtual) {
+      filtrados.push(atual);
+    }
+  }
+
+  return filtrados;
+};
+
 
 
 export default async function handler(req, res) {
