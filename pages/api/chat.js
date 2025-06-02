@@ -2,12 +2,15 @@
 import { Pool } from 'pg';
 import OpenAI from 'openai';
 import path from 'path';
+import fs from 'fs';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ✅ Importar regras aprovadas
 import rules from '/modules/data/rules';
+
+
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://tamai.pt');
@@ -70,6 +73,113 @@ ${regrasFormatadas}`.trim();
   }
 }
 
+
+
+
+// 👇 Carregar ficheiros de conhecimento
+const loadAllKnowledge = () => {
+  const dirPath = path.join(process.cwd(), 'modules', 'knowledge');
+  if (!fs.existsSync(dirPath)) return [];
+  const files = fs.readdirSync(dirPath);
+  return files
+    .filter(file => file.endsWith('.json'))
+    .map(file => {
+      const content = fs.readFileSync(path.join(dirPath, file), 'utf-8');
+      return JSON.parse(content);
+    });
+};
+
+// 👇 Extrair serviços mencionados na mensagem
+const extrairServicosDaMensagem = (mensagem, knowledgeBase) => {
+  const encontrados = [];
+
+  for (const categoria of knowledgeBase) {
+    for (const servico of categoria.servicos || []) {
+      const match = servico.keywords.every(palavra =>
+        mensagem.toLowerCase().includes(palavra)
+      );
+      if (match) encontrados.push(servico);
+    }
+  }
+
+  return encontrados;
+};
+
+
+
+
+
+async function sugerirRegraAPartirDaResposta(resposta) {
+try {
+  // 1. Tentar responder com base no conhecimento
+  const knowledgeBase = loadAllKnowledge();
+  const servicosEncontrados = extrairServicosDaMensagem(user_message, knowledgeBase);
+
+  if (servicosEncontrados.length > 0) {
+    let resposta = 'Aqui vai uma estimativa:\n\n';
+    let total = 0;
+
+    servicosEncontrados.forEach((s) => {
+      resposta += `• ${s.nome}: ${s.preco}€ + IVA\n`;
+      total += s.preco;
+    });
+
+    resposta += `\n💰 Total estimado: ${total}€ + IVA\n`;
+    resposta += `\nEstes valores são indicativos e sujeitos a avaliação presencial.`;
+
+    await pool.query(
+      `INSERT INTO conversations (session_id, user_message, ai_response, source_page, timestamp)
+       VALUES ($1, $2, $3, $4, NOW())`,
+      [session_id, user_message, resposta, source_page || null]
+    );
+
+    return res.status(200).json({ response: resposta });
+  }
+
+  // 2. Preparar regras para o modelo
+  const regrasFormatadas = rules
+    .filter((r) => r.ativa && r.aprovada)
+    .map((r) =>
+      `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`
+    )
+    .join('\n\n');
+
+  const systemPrompt = `
+És o assistente oficial da TAMAI. Responde sempre com simpatia, clareza e profissionalismo — e usa apenas português de Portugal.
+
+Tens acesso às regras de negócio aprovadas pela TAMAI, descritas abaixo. Se alguma delas se aplicar à pergunta do cliente, deves sempre basear a tua resposta nessa regra. Adapta a linguagem para parecer natural e fluida, como se fosses humano.
+
+Se não houver nenhuma correspondência clara, responde com base na política geral da TAMAI: qualidade, confiança, transparência e foco no cliente. Não inventes regras novas.
+
+Estas são as regras disponíveis:
+${regrasFormatadas}`.trim();
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: user_message }
+    ],
+    temperature: 0.3
+  });
+
+  const ai_response = completion.choices[0].message.content;
+
+  await pool.query(
+    `INSERT INTO conversations (session_id, user_message, ai_response, source_page, timestamp)
+     VALUES ($1, $2, $3, $4, NOW())`,
+    [session_id, user_message, ai_response, source_page || null]
+  );
+
+  await sugerirRegraAPartirDaResposta(ai_response);
+  return res.status(200).json({ response: ai_response });
+
+} catch (err) {
+  console.error('Erro no chat:', err);
+  return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
+}
+
+// 👇 Função de sugestão de regras automáticas com regex
 async function sugerirRegraAPartirDaResposta(resposta) {
   try {
     console.log('[DEBUG] Resposta do AI:', resposta);
