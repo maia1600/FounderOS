@@ -1,1 +1,15 @@
-
+{
+  "categoria": "estofador-auto",
+  "servicos": [
+    {
+      "nome": "Estofar banco do condutor em pele",
+      "keywords": ["estofar", "banco", "pele", "condutor"],
+      "preco": 350
+    },
+    {
+      "nome": "Estofar faixa do banco em tecido",
+      "keywords": ["estofar", "faixa", "tecido"],
+      "preco": 50
+    }
+  ]
+}
