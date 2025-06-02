@@ -71,7 +71,7 @@ ${regrasFormatadas}`.trim();
     console.error('Erro no chat:', err);
     return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
   }
-}
+
 
 
 
