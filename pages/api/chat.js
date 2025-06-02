@@ -171,8 +171,7 @@ ${regrasFormatadas}`.trim();
     [session_id, user_message, ai_response, source_page || null]
   );
 
-  await sugerirRegraAPartirDaResposta(ai_response);
-  return res.status(200).json({ response: ai_response });
+
 
 } catch (err) {
   console.error('Erro no chat:', err);
