@@ -6,7 +6,7 @@
   "keywords": ["estofar", "banco", "pele", "completo"],
   "preco": 350,
   "exclui": ["estofar faixa"]
-    },
+    }
     {
       "nome": "Estofar faixa do banco em tecido",
       "keywords": ["estofar", "faixa", "tecido"],
