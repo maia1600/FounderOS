@@ -211,7 +211,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   }
 
 
-
+  }
 
 
 
