@@ -107,9 +107,6 @@ const extrairServicosDaMensagem = (mensagem, knowledgeBase) => {
 
 
 
-
-
-async function sugerirRegraAPartirDaResposta(resposta) {
 try {
   // 1. Tentar responder com base no conhecimento
   const knowledgeBase = loadAllKnowledge();
@@ -171,13 +168,14 @@ ${regrasFormatadas}`.trim();
     [session_id, user_message, ai_response, source_page || null]
   );
 
-
+  await sugerirRegraAPartirDaResposta(ai_response);
+  return res.status(200).json({ response: ai_response });
 
 } catch (err) {
   console.error('Erro no chat:', err);
   return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
 }
-}
+
 // 👇 Função de sugestão de regras automáticas com regex
 async function sugerirRegraAPartirDaResposta(resposta) {
   try {
@@ -212,6 +210,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
 }
+
 
 
 
