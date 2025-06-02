@@ -209,7 +209,7 @@ async function sugerirRegraAPartirDaResposta(resposta) {
   } catch (err) {
     console.error('Erro ao sugerir regra automaticamente:', err);
   }
-}
+
 
 
 
