@@ -95,7 +95,7 @@ const extrairServicosDaMensagem = (mensagem, knowledgeBase) => {
 
   for (const categoria of knowledgeBase) {
     for (const servico of categoria.servicos || []) {
-      const match = servico.keywords.every(palavra =>
+      const match = servico.keywords.some(palavra =>
         mensagem.toLowerCase().includes(palavra)
       );
       if (match) encontrados.push(servico);
