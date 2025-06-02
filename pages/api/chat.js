@@ -26,7 +26,7 @@ const carregarConhecimento = () => {
 
 // ✅ Extrair serviços mencionados na mensagem
 const extrairServicosDaMensagem = (mensagem, conhecimentoBase) => {
-  const encontrados = [];
+  let encontrados = [];
 
   for (const categoria of conhecimentoBase) {
     for (const servico of categoria.servicos || []) {
@@ -37,7 +37,19 @@ const extrairServicosDaMensagem = (mensagem, conhecimentoBase) => {
     }
   }
 
+  // ❌ Remover duplicações ou sobreposições com base em "exclui"
+  const nomesServicos = encontrados.map(s => s.nome.toLowerCase());
+
+  encontrados = encontrados.filter(s => {
+    if (!s.exclui || s.exclui.length === 0) return true;
+    const conflito = s.exclui.some(nome =>
+      nomesServicos.includes(nome.toLowerCase())
+    );
+    return !conflito;
+  });
+
   return encontrados;
+};
 };
 
 export default async function handler(req, res) {
