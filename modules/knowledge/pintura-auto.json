@@ -1,1 +1,16 @@
 
+{
+  "categoria": "pintura-auto",
+  "servicos": [
+    {
+      "nome": "Pintura de painel lateral",
+      "keywords": ["pintar", "painel", "lateral"],
+      "preco": 120
+    },
+    {
+      "nome": "Pintura de para-choques frontal",
+      "keywords": ["pintar", "para-choques", "frontal"],
+      "preco": 140
+    }
+  ]
+}
