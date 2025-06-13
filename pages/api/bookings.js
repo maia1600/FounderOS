@@ -40,6 +40,15 @@ export default async function handler(req, res) {
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [nome, email, telefone, servicos, start, end, created_by || 'SilviaBot']
       );
-      res.status(201).json({
+      return res.status(201).json({ success: true, message: 'Marcação gravada com sucesso.' });
+    } catch (err) {
+      console.error('Erro no POST:', err);
+      return res.status(500).json({ error: 'Erro ao gravar marcação.' });
+    }
+  }
 
-
+  else {
+    res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
+    return res.status(405).end(`Método ${req.method} não permitido`);
+  }
+}
