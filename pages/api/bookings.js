@@ -19,16 +19,16 @@ export default async function handler(req, res) {
   }
 
   else if (req.method === 'POST') {
-    const { title, start, "end", created_by } = req.body;
+   const { title, start, end, created_by } = req.body;
     if (!title || !start || !end) {
       return res.status(400).json({ error: 'Dados incompletos.' });
     }
 
     try {
-      await pool.query(
-        'INSERT INTO bookings (title, start, "end", created_by) VALUES ($1, $2, $3, $4)',
-        [title, start, end, created_by || 'Desconhecido']
-      );
+await pool.query(
+  'INSERT INTO bookings (title, start, "end", created_by) VALUES ($1, $2, $3, $4)',
+  [title, start, end, created_by || 'Desconhecido']
+);
       res.status(201).json({ success: true });
     } catch (err) {
       res.status(500).json({ error: 'Erro ao gravar marcação.' });
