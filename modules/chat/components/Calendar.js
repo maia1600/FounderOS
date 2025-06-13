@@ -16,6 +16,12 @@ export default function Calendar() {
           title: `${event.nome} - ${event.servicos}`,
           start: new Date(event.start),
           end: new Date(event.end),
+          extendedProps: {
+            nome: event.nome,
+            email: event.email,
+            telefone: event.telefone,
+            servicos: event.servicos
+          }
         }));
         setEvents(formatted);
       });
@@ -57,6 +63,19 @@ export default function Calendar() {
     }
   };
 
+  const handleEventClick = (clickInfo) => {
+    const { extendedProps, start, end } = clickInfo.event;
+    const detalhes = `
+Cliente: ${extendedProps.nome}
+Email: ${extendedProps.email}
+Telefone: ${extendedProps.telefone}
+Serviços: ${extendedProps.servicos}
+Início: ${new Date(start).toLocaleString()}
+Fim: ${new Date(end).toLocaleString()}
+    `;
+    alert(detalhes);
+  };
+
   return (
     <div className="p-4">
       <FullCalendar
@@ -65,6 +84,7 @@ export default function Calendar() {
         selectable={true}
         events={events}
         select={handleDateSelect}
+        eventClick={handleEventClick}
         height="auto"
         headerToolbar={{
           left: 'prev,next today',
@@ -75,4 +95,5 @@ export default function Calendar() {
     </div>
   );
 }
+
 
