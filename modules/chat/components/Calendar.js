@@ -1,3 +1,4 @@
+'use client';
 
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -12,30 +13,48 @@ export default function Calendar() {
       .then(res => res.json())
       .then(data => {
         const formatted = data.map(event => ({
-          ...event,
+          title: `${event.nome} - ${event.servicos}`,
           start: new Date(event.start),
-          end: new Date(event.end)
+          end: new Date(event.end),
         }));
         setEvents(formatted);
       });
   }, []);
 
   const handleDateSelect = async (info) => {
-    const title = prompt('Título da marcação:');
-    if (!title) return;
+    const nome = prompt('Nome do cliente:');
+    if (!nome) return;
 
-    await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title,
-        start: info.startStr,
-        end: info.endStr,
-        created_by: 'Utilizador'
-      })
-    });
+    const telefone = prompt('Telefone:');
+    const email = prompt('Email:');
+    const servicos = prompt('Serviços pedidos:');
+    if (!servicos) return;
 
-    window.location.reload(); // simples por agora
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome,
+          email,
+          telefone,
+          servicos,
+          start: info.startStr,
+          end: info.endStr,
+          created_by: 'Utilizador'
+        })
+      });
+
+      if (!res.ok) {
+        const erro = await res.json();
+        throw new Error(erro?.error || 'Erro ao gravar.');
+      }
+
+      window.location.reload();
+    } catch (err) {
+      console.error('Erro ao gravar:', err);
+      alert('Erro ao gravar: ' + err.message);
+    }
   };
 
   return (
@@ -56,3 +75,4 @@ export default function Calendar() {
     </div>
   );
 }
+
