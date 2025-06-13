@@ -1,7 +1,7 @@
 
 import dynamic from 'next/dynamic';
 
-const Calendar = dynamic(() => import('@/modules/chat/components/Calendar'), { ssr: false });
+const Calendar = dynamic(() => import('/modules/chat/components/Calendar'), { ssr: false });
 
 export default function CalendarioPage() {
   return (
