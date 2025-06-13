@@ -1,11 +1,8 @@
-
 import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
 export default async function handler(req, res) {
@@ -19,16 +16,19 @@ export default async function handler(req, res) {
   }
 
   else if (req.method === 'POST') {
-   const { title, start, end, created_by } = req.body;
-    if (!title || !start || !end) {
+    const { nome, email, telefone, servicos, start, end, created_by } = req.body;
+
+    if (!nome || !servicos || !start || !end) {
       return res.status(400).json({ error: 'Dados incompletos.' });
     }
 
     try {
-await pool.query(
-  'INSERT INTO bookings (title, start, "end", created_by) VALUES ($1, $2, $3, $4)',
-  [title, start, end, created_by || 'Desconhecido']
-);
+      await pool.query(
+        `INSERT INTO bookings 
+         (nome, email, telefone, servicos, start, "end", created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [nome, email, telefone, servicos, start, end, created_by || 'Desconhecido']
+      );
       res.status(201).json({ success: true });
     } catch (err) {
       res.status(500).json({ error: 'Erro ao gravar marcação.' });
@@ -40,3 +40,4 @@ await pool.query(
     res.status(405).end(`Método ${req.method} não permitido`);
   }
 }
+
