@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`, // ← chave gerada no agente
+          Authorization: `Bearer sk-Y2Y2NTcwOTMtODQ2Yi00MmU5LTg2YzYtZTg3YWQyZTdhNTZl`, // ← chave gerada no agente
         },
         body: JSON.stringify({
           message: {
