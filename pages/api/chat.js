@@ -33,67 +33,67 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Chamada à API da RelevanceAI
-    const relevanceResponse = await fetch(
-      'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
-     
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.RELEVANCE_API_KEY}`,
+  const relevanceRes = await fetch(
+    'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        message: {
+          role: 'user',
+          content: message,
         },
-        body: JSON.stringify({
-          message: {
-            role: 'user',
-            content: message,
-          },
-          agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-        }),
-      }
-    );
+        agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+      }),
+    }
+  );
 
+  const raw = await relevanceRes.text(); // ← evita falha se JSON for inválido
+  console.log('🧠 RAW response da Relevance →', raw);
 
-
-    
-
-    const relevanceData = await relevanceResponse.json();
-    console.log('🧠 DEBUG :: Resposta RelevanceAI completa →', relevanceData);
-
-    // Extrair resposta da Silvia (ajustar este campo se necessário)
-    const aiResponse =
-      relevanceData.output ||
-      relevanceData.result?.message ||
-      'Desculpa, não consegui interpretar.';
-
-    // Guardar na base de dados Neon
-    await pool.query(
-      `INSERT INTO conversations (
-        session_id, user_message, ai_response, source_page,
-        timestamp, categoria_servico, marca_carro, modelo_carro, ano_carro
-      ) VALUES ($1, $2, $3, $4, NOW(), $5, $6, $7, $8)`,
-      [
-        session_id,
-        message,
-        aiResponse,
-        source_page,
-        categoria_servico,
-        marca_carro,
-        modelo_carro,
-        ano_carro,
-      ]
-    );
-
-    // Enviar de volta ao frontend
-    res.status(200).json({ response: aiResponse });
-  } catch (error) {
-    console.error('❌ ERRO CRÍTICO NO /api/chat:', error);
-    res
-      .status(500)
-      .json({ error: 'Erro interno no servidor', details: error.message });
+  let relevanceData;
+  try {
+    relevanceData = JSON.parse(raw);
+    console.log('🧠 JSON RelevanceAI →', relevanceData);
+  } catch (jsonErr) {
+    console.error('⚠️ Erro ao fazer JSON.parse:', jsonErr);
+    relevanceData = {};
   }
-}
 
+  const aiResponse =
+    relevanceData.output ||
+    relevanceData.result?.message ||
+    relevanceData.message?.text ||
+    raw || // fallback para mostrar o que veio mesmo sem parse
+    'Desculpa, não consegui interpretar.';
+
+  // Guarda na Neon
+  await pool.query(
+    `INSERT INTO conversations (
+      session_id, user_message, ai_response, source_page,
+      timestamp, categoria_servico, marca_carro, modelo_carro, ano_carro
+    ) VALUES ($1, $2, $3, $4, NOW(), $5, $6, $7, $8)`,
+    [
+      session_id,
+      message,
+      aiResponse,
+      source_page,
+      categoria_servico,
+      marca_carro,
+      modelo_carro,
+      ano_carro,
+    ]
+  );
+
+  res.status(200).json({ response: aiResponse });
+
+} catch (error) {
+  console.error('❌ ERRO CRÍTICO NO /api/chat:', error);
+  res.status(500).json({ error: 'Erro interno no servidor', details: error.message });
+}
 
 
 
