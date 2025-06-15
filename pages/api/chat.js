@@ -45,6 +45,8 @@ export default async function handler(req, res) {
       }
     );
 
+    
+
     const raw = await relevanceRes.text();
     console.log('🧠 RAW response da Relevance →', raw);
 
