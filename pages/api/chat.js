@@ -1,196 +1,62 @@
-
 // /pages/api/chat.js
+
 import { Pool } from 'pg';
-import OpenAI from 'openai';
-import path from 'path';
-import fs from 'fs';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// ✅ Importar regras aprovadas
-import rules from '/modules/data/rules';
-
-// ✅ Carregar ficheiros de conhecimento
-const carregarConhecimento = () => {
-  const dirPath = path.join(process.cwd(), 'modules', 'knowledge');
-  if (!fs.existsSync(dirPath)) return [];
-  const files = fs.readdirSync(dirPath);
-  return files
-    .filter(file => file.endsWith('.json'))
-    .map(file => {
-      const content = fs.readFileSync(path.join(dirPath, file), 'utf-8');
-      return JSON.parse(content);
-    });
-};
-
-// ✅ Extrair serviços mencionados na mensagem
-const extrairServicosDaMensagem = (mensagem, conhecimentoBase) => {
-  let encontrados = [];
-
-  for (const categoria of conhecimentoBase) {
-    for (const servico of categoria.servicos || []) {
-      const match = servico.keywords.some(palavra =>
-        mensagem.toLowerCase().includes(palavra)
-      );
-      if (match) encontrados.push(servico);
-    }
-  }
-
-  // ✅ Validação por interseção de keywords
-  const filtrados = [];
-
-  for (const atual of encontrados) {
-    const conflitaComFiltrados = filtrados.some((outro) => {
-      if (!atual.exclui || !outro.keywords) return false;
-
-      return atual.exclui.some(excluida =>
-        outro.keywords.includes(excluida.toLowerCase())
-      );
-    });
-
-    const conflitaComAtual = filtrados.some((outro) => {
-      if (!outro.exclui || !atual.keywords) return false;
-
-      return outro.exclui.some(excluida =>
-        atual.keywords.includes(excluida.toLowerCase())
-      );
-    });
-
-    if (!conflitaComFiltrados && !conflitaComAtual) {
-      filtrados.push(atual);
-    }
-  }
-
-  return filtrados;
-};
-
-
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://tamai.pt');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  if (req.method !== 'POST') return res.status(405).end();
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
 
-  const { user_message, session_id, source_page } = req.body;
-  if (!user_message) return res.status(400).json({ error: 'Mensagem do utilizador em falta.' });
+  const { message, session_id } = req.body;
+
+  if (!message || !session_id) {
+    return res.status(400).json({ error: 'Parâmetros inválidos' });
+  }
 
   try {
-    // 1. Tentar responder com base no conhecimento
-    const conhecimentoBase = carregarConhecimento();
-    const servicosEncontrados = extrairServicosDaMensagem(user_message, conhecimentoBase);
-
-    if (servicosEncontrados.length > 0) {
-      let resposta = 'Aqui vai uma estimativa:\n\n';
-      let total = 0;
-
-      servicosEncontrados.forEach((s) => {
-        resposta += `• ${s.nome}: ${s.preco}€ + IVA\n`;
-        total += s.preco;
-      });
-
-      resposta += `\n💰 Total estimado: ${total}€ + IVA\n`;
-      resposta += `\nEstes valores são indicativos e sujeitos a avaliação presencial.`;
-
-      await pool.query(
-        `INSERT INTO conversations (session_id, user_message, ai_response, source_page, timestamp)
-         VALUES ($1, $2, $3, $4, NOW())`,
-        [session_id, user_message, resposta, source_page || null]
-      );
-
-      return res.status(200).json({ response: resposta });
-    }
-
-    // 2. Preparar regras para o modelo
-    const regrasFormatadas = rules
-      .filter((r) => r.ativa && r.aprovada)
-      .map((r) => 
-        `Categoria: ${r.categoria}\nCondição: ${r.condicao}\nAção: ${r.acao}${r.exemplo ? `\nExemplo: ${r.exemplo}` : ''}`
-      )
-      .join('\n\n');
-
-    const systemPrompt = `
-És o assistente oficial da TAMAI. Responde sempre com simpatia, clareza e profissionalismo — e usa apenas português de Portugal.
-
-Tens acesso às regras de negócio aprovadas pela TAMAI, descritas abaixo.  
-🟥 A tua prioridade absoluta é aplicar essas regras com exatidão.
-
-Se alguma delas se aplicar à pergunta do cliente, deves responder **exclusivamente com base nessa regra**, sem misturar com linguagem genérica, sem suavizar, e sem desviar. Usa exatamente a linguagem da ação da regra, adaptando apenas o tom e a fluidez para parecer humano.
-
-❌ Nunca ignores ou contornes uma regra.  
-❌ Nunca inventes políticas, condições ou respostas que não constem numa regra aprovada.
-
-Se não houver nenhuma correspondência clara, responde com base na política geral da TAMAI: qualidade, confiança, transparência e foco no cliente — mas sempre com precisão e objetividade.
-
-
-Estas são as regras disponíveis:
-${regrasFormatadas}`.trim();
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: user_message }
-      ],
-      temperature: 0.3
+    // Enviar mensagem para o agente da RelevanceAI
+    const relevanceResponse = await fetch('https://api-dcbe5a.stack.tryrelevance.com/latest/agents/trigger', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.RELEVANCE_API_KEY}`
+      },
+      body: JSON.stringify({
+        message: {
+          role: 'user',
+          content: message
+        },
+        agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b'
+      })
     });
 
-    const ai_response = completion.choices[0].message.content;
+    const relevanceData = await relevanceResponse.json();
 
+    // A resposta da Relevance vem em relevanceData.output ou algo semelhante
+    const aiResponse = relevanceData.output || 'Desculpa, não consegui interpretar.';
+
+    // Guardar na base de dados Neon
     await pool.query(
-      `INSERT INTO conversations (session_id, user_message, ai_response, source_page, timestamp)
-       VALUES ($1, $2, $3, $4, NOW())`,
-      [session_id, user_message, ai_response, source_page || null]
+      'INSERT INTO conversations (session_id, user_message, ai_response, timestamp) VALUES ($1, $2, $3, NOW())',
+      [session_id, message, aiResponse]
     );
 
-    await sugerirRegraAPartirDaResposta(ai_response);
-    return res.status(200).json({ response: ai_response });
+    // Devolver ao frontend
+    res.status(200).json({ response: aiResponse });
 
-  } catch (err) {
-    console.error('Erro no chat:', err);
-    return res.status(500).json({ error: 'Erro no servidor.', detalhe: err.message });
-  }
-}
-
-// ✅ Função de sugestão de regras automáticas com regex
-async function sugerirRegraAPartirDaResposta(resposta) {
-  try {
-    console.log('[DEBUG] Resposta do AI:', resposta);
-
-    const regex = /categoria[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*condi[cç][aã]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)\s*a[cç][aã]o[:\-\u00e0]?\s*(.+?)\s*(?:\n|,)?(?:exemplo[:\-\u00e0]?\s*(.+))?/i;
-    const match = resposta.match(regex);
-
-    if (!match) {
-      console.log('[INFO] Nenhuma correspondência de regra encontrada.');
-      return;
-    }
-
-    const categoria = match[1]?.trim();
-    const condicao = match[2]?.trim();
-    const acao = match[3]?.trim();
-    const exemplo = match[4]?.trim() || '';
-
-    if (!categoria || !condicao || !acao) {
-      console.log('[INFO] Dados insuficientes para criar regra.');
-      return;
-    }
-
-    await pool.query(
-      `INSERT INTO regras (categoria, condicao, acao, exemplo, ativa, aprovada, sugerida_por_ia)
-       VALUES ($1, $2, $3, $4, true, false, true)`,
-      [categoria, condicao, acao, exemplo]
-    );
-
-    console.log('[INFO] Regra sugerida com sucesso:', { categoria, condicao, acao, exemplo });
-  } catch (err) {
-    console.error('Erro ao sugerir regra automaticamente:', err);
+  } catch (error) {
+    console.error('Erro ao contactar Relevance:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
   }
 }
 
