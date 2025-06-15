@@ -7,38 +7,43 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
- const API_URL = 'https://founder-os-psi.vercel.app/api/chat';
+  const API_URL = 'https://founder-os-psi.vercel.app/api/chat';
 
-useEffect(() => {
-  let id = localStorage.getItem('session_id');
-  if (!id) {
-    id = uuidv4();
-    localStorage.setItem('session_id', id);
-  }
-  setSessionId(id);
-}, []);
+  useEffect(() => {
+    let id = localStorage.getItem('session_id');
+    if (!id) {
+      id = uuidv4();
+      localStorage.setItem('session_id', id);
+    }
+    setSessionId(id);
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || input.trim().length < 5) {
-  alert('Por favor, descreva melhor o problema.');
-  return;
-}
+      alert('Por favor, descreva melhor o problema.');
+      return;
+    }
 
     const userMessage = { role: 'user', content: input };
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
 
     try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          message: input, // <- Este nome precisa bater com o backend
+          source_page: 'index2.html',
 
-const res = await fetch(API_URL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    session_id: sessionId,
-    user_message: input,
-    source_page: 'index2.html',
-  }),
-});
+          // Dados adicionais (podem estar vazios para já)
+          categoria_servico: '',
+          marca_carro: '',
+          modelo_carro: '',
+          ano_carro: '',
+        }),
+      });
 
       const data = await res.json();
       if (data.response) {
