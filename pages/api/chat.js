@@ -17,14 +17,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  const { message, session_id } = req.body;
+  const { message, session_id, categoria_servico, marca_carro, modelo_carro, ano_carro } = req.body;
 
   if (!message || !session_id) {
-    return res.status(400).json({ error: 'Parâmetros inválidos' });
+    return res.status(400).json({ error: 'Parâmetros obrigatórios em falta' });
   }
 
   try {
-    // Enviar mensagem para o agente da RelevanceAI
+    // Chamar RelevanceAI
     const relevanceResponse = await fetch('https://api-dcbe5a.stack.tryrelevance.com/latest/agents/trigger', {
       method: 'POST',
       headers: {
@@ -42,20 +42,23 @@ export default async function handler(req, res) {
 
     const relevanceData = await relevanceResponse.json();
 
-    // A resposta da Relevance vem em relevanceData.output ou algo semelhante
+    // Ajusta aqui se o conteúdo vier noutro campo
     const aiResponse = relevanceData.output || 'Desculpa, não consegui interpretar.';
 
-    // Guardar na base de dados Neon
+    // Gravar na base de dados
     await pool.query(
-      'INSERT INTO conversations (session_id, user_message, ai_response, timestamp) VALUES ($1, $2, $3, NOW())',
-      [session_id, message, aiResponse]
+      `INSERT INTO conversations (
+        session_id, user_message, ai_response, source_page,
+        timestamp, categoria_servico, marca_carro, modelo_carro, ano_carro
+      ) VALUES ($1, $2, $3, $4, NOW(), $5, $6, $7, $8)`,
+      [session_id, message, aiResponse, 'website', categoria_servico, marca_carro, modelo_carro, ano_carro]
     );
 
-    // Devolver ao frontend
+    // Devolver resposta ao frontend
     res.status(200).json({ response: aiResponse });
 
   } catch (error) {
-    console.error('Erro ao contactar Relevance:', error);
+    console.error('Erro ao contactar RelevanceAI:', error);
     res.status(500).json({ error: 'Erro interno no servidor' });
   }
 }
