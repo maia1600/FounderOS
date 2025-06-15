@@ -27,16 +27,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Formatar token como project:api_key:region
-    const token = `${process.env.RELEVANCE_PROJECT_ID}:${process.env.RELEVANCE_API_KEY}:${process.env.RELEVANCE_REGION}`;
-
     const relevanceRes = await fetch(
       'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
         },
         body: JSON.stringify({
           message: {
@@ -91,7 +88,6 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Erro interno no servidor', details: error.message });
   }
 }
-
 
 
 
