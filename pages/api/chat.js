@@ -41,6 +41,7 @@ export default async function handler(req, res) {
     });
 
     const relevanceData = await relevanceResponse.json();
+    console.log('DEBUG :: Resposta da RelevanceAI →', relevanceData);
 
     // Ajusta aqui se o conteúdo vier noutro campo
     const aiResponse = relevanceData.output || 'Desculpa, não consegui interpretar.';
