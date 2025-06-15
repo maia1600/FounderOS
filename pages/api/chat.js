@@ -29,21 +29,21 @@ export default async function handler(req, res) {
   try {
     const relevanceRes = await fetch(
       'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer project:${process.env.RELEVANCE_API_KEY}:${process.env.RELEVANCE_REGION}`,
-        },
-        body: JSON.stringify({
-          message: {
-            role: 'user',
-            content: message,
-          },
-          agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-        }),
-      }
-    );
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`, // chave gerada DENTRO do agente
+    },
+    body: JSON.stringify({
+      message: {
+        role: 'user',
+        content: message,
+      },
+      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+    }),
+  }
+);
 
     
 
