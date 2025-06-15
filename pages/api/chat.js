@@ -35,7 +35,8 @@ export default async function handler(req, res) {
   try {
     // Chamada à API da RelevanceAI
     const relevanceResponse = await fetch(
-      'https://api-dcbe5a.stack.tryrelevance.com/latest/agents/trigger',
+      'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
+     
       {
         method: 'POST',
         headers: {
@@ -51,6 +52,10 @@ export default async function handler(req, res) {
         }),
       }
     );
+
+
+
+    
 
     const relevanceData = await relevanceResponse.json();
     console.log('🧠 DEBUG :: Resposta RelevanceAI completa →', relevanceData);
