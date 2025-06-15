@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
+          Authorization: `Bearer project:${process.env.RELEVANCE_API_KEY}:${process.env.RELEVANCE_REGION}`,
         },
         body: JSON.stringify({
           message: {
@@ -88,6 +88,5 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Erro interno no servidor', details: error.message });
   }
 }
-
 
 
