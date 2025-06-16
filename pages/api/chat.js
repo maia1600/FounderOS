@@ -26,6 +26,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Parâmetros obrigatórios em falta' });
   }
 
+  
   try {
     const relevanceRes = await fetch(
       'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
