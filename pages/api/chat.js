@@ -1,6 +1,5 @@
 import { Pool } from 'pg';
 import fetch from 'node-fetch';
-import https from 'https';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -29,20 +28,20 @@ export default async function handler(req, res) {
   }
 
   try {
-const relevanceRes = await fetch('https://api.tryrelevance.com/latest/agents/trigger', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
-  },
-  body: JSON.stringify({
-    message: {
-      role: 'user',
-      content: message,
-    },
-    agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-  }),
-});
+    const relevanceRes = await fetch('https://api.tryrelevance.com/latest/agents/trigger', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        message: {
+          role: 'user',
+          content: message,
+        },
+        agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+      }),
+    });
 
     const raw = await relevanceRes.text();
     console.log('🧠 RAW response da Relevance →', raw);
@@ -54,7 +53,7 @@ const relevanceRes = await fetch('https://api.tryrelevance.com/latest/agents/tri
       return res.status(502).json({ error: 'Resposta inválida da Relevance', raw });
     }
 
-    // TODO opcional: gravar no Neon com pool.query(...)
+    // TODO: opcionalmente gravar no Neon
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
@@ -62,4 +61,5 @@ const relevanceRes = await fetch('https://api.tryrelevance.com/latest/agents/tri
     return res.status(500).json({ error: 'Falha na comunicação com a Relevance', details: error.message });
   }
 }
+
 
