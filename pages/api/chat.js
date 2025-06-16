@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-         Authorization: 'Bearer sk-Y2U4NzRiMGUtOTJjOC00Yjg5LWFjOGEtZWM4ZDZiZWQ1NTUx',
+         Authorization: 'api_key sk-Y2U4NzRiMGUtOTJjOC00Yjg5LWFjOGEtZWM4ZDZiZWQ1NTUx',
 
         },
         body: JSON.stringify({
