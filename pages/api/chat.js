@@ -28,17 +28,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app'}/relay`;
+   const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app'}/relay`;
+console.log('🔁 A enviar para proxy URL:', proxyURL); // <--- ajuda a debugar
 
-    const response = await fetch(proxyURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-        api_key: process.env.RELEVANCE_API_KEY,
-      }),
-    });
+const response = await fetch(proxyURL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    message,
+    agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+    api_key: process.env.RELEVANCE_API_KEY,
+  }),
+});
 
     const contentType = response.headers.get('content-type');
     const raw = await response.text();
