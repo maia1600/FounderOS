@@ -28,12 +28,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 🚀 Chamada ao proxy Manus em vez de chamar diretamente a Relevance
-    const proxyRes = await fetch('https://3000-itvcypt6ehrwvc5licjgd-46723f17.manusvm.computer/relay', {
+    const proxyURL = process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app';
+
+    const response = await fetch(proxyURL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message,
         agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
@@ -41,8 +40,8 @@ export default async function handler(req, res) {
       }),
     });
 
-    const raw = await proxyRes.text();
-    console.log('🧠 RAW response do Proxy Manus →', raw);
+    const raw = await response.text();
+    console.log('🧠 RAW response do Proxy Replit →', raw);
 
     let relevanceData;
     try {
@@ -51,12 +50,12 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Resposta inválida do proxy', raw });
     }
 
-    // TODO: opcional — gravar em base de dados com pool.query(...)
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
-    console.error('💥 ERRO CRÍTICO NO /api/chat:', error.message);
-    return res.status(500).json({ error: 'Falha na comunicação com o proxy', details: error.message });
+    console.error('💥 ERRO FATAL no /api/chat:', error.message);
+    return res.status(502).json({ error: 'Falha na comunicação com o proxy', details: error.message });
   }
 }
+
 
