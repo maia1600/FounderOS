@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const proxyURL = process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app';
+    const proxyURL = process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app/relay';
 
     const response = await fetch(proxyURL, {
       method: 'POST',
@@ -40,21 +40,27 @@ export default async function handler(req, res) {
       }),
     });
 
-    const raw = await response.text();
-    console.log('🧠 RAW response do Proxy Replit →', raw);
+    const contentType = response.headers.get('content-type');
 
     let relevanceData;
-    try {
-      relevanceData = JSON.parse(raw);
-    } catch (e) {
+    if (contentType && contentType.includes('application/json')) {
+      relevanceData = await response.json();
+    } else {
+      const raw = await response.text();
+      console.error('⚠️ Proxy respondeu com HTML:', raw.slice(0, 150));
       return res.status(502).json({ error: 'Resposta inválida do proxy', raw });
     }
+
+    // Podes opcionalmente guardar na DB aqui com o `pool.query(...)`
 
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
     console.error('💥 ERRO FATAL no /api/chat:', error.message);
     return res.status(502).json({ error: 'Falha na comunicação com o proxy', details: error.message });
+  }
+}
+
   }
 }
 
