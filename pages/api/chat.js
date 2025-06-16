@@ -30,37 +30,47 @@ export default async function handler(req, res) {
   try {
     const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app'}/api/relay`;
 
-    console.log('🚀 A enviar para proxy URL:', proxyURL);
+    const requestBody = {
+      message,
+      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+      api_key: process.env.RELEVANCE_API_KEY,
+    };
+
+    console.log('📤 A enviar para proxy:', proxyURL);
+    console.log('📦 Body do proxy →', requestBody);
 
     const response = await fetch(proxyURL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-        api_key: process.env.RELEVANCE_API_KEY,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     const contentType = response.headers.get('content-type');
+    const raw = await response.text();
+
     if (!contentType || !contentType.includes('application/json')) {
-      const raw = await response.text();
-      console.error('⚠️ Proxy respondeu com HTML em vez de JSON:', raw.slice(0, 300));
-      return res.status(502).json({ error: 'Proxy respondeu com HTML', raw });
+      console.error('⚠️ Proxy respondeu com HTML →', raw.slice(0, 300));
+      return res.status(502).json({ error: 'Resposta inválida do proxy (HTML)', raw });
     }
 
-    const relevanceData = await response.json();
+    const relevanceData = JSON.parse(raw);
+    console.log('✅ Resposta da Relevance via proxy:', relevanceData);
 
-    // 💾 [Opcional] Gravação na base de dados
-    // await pool.query(`INSERT INTO conversations (...) VALUES (...)`, [...]);
+    if (!relevanceData || !relevanceData.message) {
+      return res.status(502).json({ error: 'Resposta incompleta ou inválida da Relevance', relevanceData });
+    }
+
+    // Podes guardar no Neon se quiseres (exemplo comentado)
+    // await pool.query('INSERT INTO conversations (...) VALUES (...)');
 
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
-    console.error('💥 ERRO no /api/chat:', error.message);
-    return res.status(502).json({ error: 'Erro ao comunicar com o proxy', details: error.message });
+    console.error('💥 ERRO FATAL no /api/chat:', error.message);
+    return res.status(502).json({ error: 'Falha na comunicação com o proxy', details: error.message });
   }
 }
+
 
 
 
