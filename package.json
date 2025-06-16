@@ -12,6 +12,7 @@
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
     "next": "latest",
+    "node-fetch": "^3.3.2",
     "openai": "^5.0.1",
     "pg": "^8.7.3",
     "react": "latest",
