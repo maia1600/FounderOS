@@ -28,7 +28,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const proxyURL = process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app/api/relay';
+    const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app'}/api/relay`;
+
     console.log('🚀 A enviar para proxy URL:', proxyURL);
 
     const response = await fetch(proxyURL, {
@@ -41,21 +42,23 @@ export default async function handler(req, res) {
       }),
     });
 
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
       const raw = await response.text();
-      console.error('⚠️ Proxy respondeu com HTML:', raw.slice(0, 300));
-      return res.status(502).json({ error: 'Resposta inválida do proxy', raw });
+      console.error('⚠️ Proxy respondeu com HTML em vez de JSON:', raw.slice(0, 300));
+      return res.status(502).json({ error: 'Proxy respondeu com HTML', raw });
     }
 
     const relevanceData = await response.json();
 
-    // opcional: gravar no Neon (futura versão)
+    // 💾 [Opcional] Gravação na base de dados
+    // await pool.query(`INSERT INTO conversations (...) VALUES (...)`, [...]);
+
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
-    console.error('💥 ERRO FATAL no /api/chat:', error.message);
-    return res.status(502).json({ error: 'Falha na comunicação com o proxy', details: error.message });
+    console.error('💥 ERRO no /api/chat:', error.message);
+    return res.status(502).json({ error: 'Erro ao comunicar com o proxy', details: error.message });
   }
 }
 
