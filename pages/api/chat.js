@@ -28,35 +28,29 @@ export default async function handler(req, res) {
   }
 
   try {
-   const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app/api/relay'}`;
+    const proxyURL = process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app/api/relay';
+    console.log('🚀 A enviar para proxy URL:', proxyURL);
 
-    
-console.log('🔁 A enviar para proxy URL:', proxyURL); // <--- ajuda a debugar
+    const response = await fetch(proxyURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+        api_key: process.env.RELEVANCE_API_KEY,
+      }),
+    });
 
-const response = await fetch(proxyURL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    message,
-    agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-    api_key: process.env.RELEVANCE_API_KEY,
-  }),
-});
-
-    const contentType = response.headers.get('content-type');
-    const raw = await response.text();
-    console.log('🧠 RAW response do Proxy Replit →', raw.slice(0, 300));
-
-    if (!contentType || !contentType.includes('application/json')) {
-      return res.status(502).json({
-        error: 'Resposta inválida do proxy',
-        raw: raw.slice(0, 200),
-      });
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const raw = await response.text();
+      console.error('⚠️ Proxy respondeu com HTML:', raw.slice(0, 300));
+      return res.status(502).json({ error: 'Resposta inválida do proxy', raw });
     }
 
-    const relevanceData = JSON.parse(raw);
+    const relevanceData = await response.json();
 
-    // Aqui podes gravar na DB se quiseres com pool.query(...)
+    // opcional: gravar no Neon (futura versão)
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
