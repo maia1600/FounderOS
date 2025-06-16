@@ -28,23 +28,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const relevanceRes = await fetch('https://api.tryrelevance.com/latest/agents/trigger', {
+    const relevanceRes = await fetch('https://3000-itvcypt6ehrwvc5licjgd-46723f17.manusvm.computer/relay', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
       },
       body: JSON.stringify({
-        message: {
-          role: 'user',
-          content: message,
-        },
+        message,
         agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+        api_key: process.env.RELEVANCE_API_KEY,
       }),
     });
 
     const raw = await relevanceRes.text();
-    console.log('🧠 RAW response da Relevance →', raw);
+    console.log('🧠 RAW response da Relevance via Proxy →', raw);
 
     let relevanceData;
     try {
@@ -53,13 +50,13 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Resposta inválida da Relevance', raw });
     }
 
-    // TODO: opcionalmente gravar no Neon
+    // TODO opcional: gravar no Neon com pool.query(...)
+
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
     console.error('💥 ERRO CRÍTICO NO /api/chat:', error.message);
-    return res.status(500).json({ error: 'Falha na comunicação com a Relevance', details: error.message });
+    return res.status(500).json({ error: 'Falha na comunicação com o Proxy da Relevance', details: error.message });
   }
 }
-
 
