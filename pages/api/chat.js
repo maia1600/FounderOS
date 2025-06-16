@@ -28,24 +28,23 @@ export default async function handler(req, res) {
 
   
   try {
-    const relevanceRes = await fetch(
-      'https://api-bcbe5a.stack.tryrelevance.com/latest/agents/trigger',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-         Authorization: `project:${process.env.RELEVANCE_API_KEY}`
-
-        },
-        body: JSON.stringify({
-          message: {
-            role: 'user',
-            content: message,
-          },
-          agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-        }),
-      }
-    );
+const relevanceRes = await fetch(
+  'https://api.tryrelevance.com/latest/agents/trigger',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
+    },
+    body: JSON.stringify({
+      message: {
+        role: 'user',
+        content: message,
+      },
+      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
+    }),
+  }
+);
 
     const raw = await relevanceRes.text();
     console.log('🧠 RAW response da Relevance →', raw);
