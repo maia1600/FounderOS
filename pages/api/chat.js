@@ -28,11 +28,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const relevanceRes = await fetch('https://3000-itvcypt6ehrwvc5licjgd-46723f17.manusvm.computer/relay', {
+    const relayResponse = await fetch('https://3000-itvcypt6ehrwvc5licjgd-46723f17.manusvm.computer/relay', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message,
         agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
@@ -40,23 +38,27 @@ export default async function handler(req, res) {
       }),
     });
 
-    const raw = await relevanceRes.text();
-    console.log('🧠 RAW response da Relevance via Proxy →', raw);
+    const raw = await relayResponse.text();
+    console.log('🧠 RAW response do Proxy Manus →', raw);
 
-    let relevanceData;
+    let parsed;
     try {
-      relevanceData = JSON.parse(raw);
+      parsed = JSON.parse(raw);
     } catch (e) {
-      return res.status(502).json({ error: 'Resposta inválida da Relevance', raw });
+      return res.status(502).json({ error: 'Resposta inválida do proxy Manus', raw });
     }
 
-    // TODO opcional: gravar no Neon com pool.query(...)
+    // (Opcional) Gravar no Neon
+    // await pool.query('INSERT INTO conversations (...) VALUES (...)');
 
-    return res.status(200).json({ resposta: relevanceData });
+    return res.status(200).json({ resposta: parsed });
 
   } catch (error) {
     console.error('💥 ERRO CRÍTICO NO /api/chat:', error.message);
-    return res.status(500).json({ error: 'Falha na comunicação com o Proxy da Relevance', details: error.message });
+    return res.status(500).json({
+      error: 'Falha na comunicação com o proxy Manus',
+      details: error.message,
+    });
   }
 }
 
