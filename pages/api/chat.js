@@ -29,6 +29,8 @@ export default async function handler(req, res) {
 
   try {
    const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app/api/relay'}`;
+
+    
 console.log('🔁 A enviar para proxy URL:', proxyURL); // <--- ajuda a debugar
 
 const response = await fetch(proxyURL, {
