@@ -1,4 +1,6 @@
 import { Pool } from 'pg';
+import fetch from 'node-fetch';
+import https from 'https';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -33,6 +35,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.RELEVANCE_API_KEY}`,
       },
+      agent: new https.Agent({ rejectUnauthorized: false }), // para SSL debugging
       body: JSON.stringify({
         message: {
           role: 'user',
@@ -43,46 +46,21 @@ export default async function handler(req, res) {
     });
 
     const raw = await relevanceRes.text();
-    console.log('📥 RAW da Relevance →', raw);
+    console.log('🧠 RAW response da Relevance →', raw);
 
     let relevanceData;
     try {
       relevanceData = JSON.parse(raw);
-    } catch (err) {
-      console.error('❌ Erro ao fazer parse do JSON da Relevance:', err);
-      return res.status(500).json({ error: 'Resposta inválida da Relevance' });
+    } catch (e) {
+      return res.status(502).json({ error: 'Resposta inválida da Relevance', raw });
     }
 
-    if (!relevanceRes.ok) {
-      console.error('❌ Erro da Relevance:', relevanceData);
-      return res.status(relevanceRes.status).json({
-        error: relevanceData?.message || 'Erro da Relevance',
-      });
-    }
+    // TODO opcional: gravar no Neon com pool.query(...)
+    return res.status(200).json({ resposta: relevanceData });
 
-    const ai_response = relevanceData?.message?.content || '';
-
-    await pool.query(
-      `INSERT INTO conversations 
-        (session_id, user_message, ai_response, source_page, categoria_servico, marca_carro, modelo_carro, ano_carro) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        session_id,
-        message,
-        ai_response,
-        source_page,
-        categoria_servico,
-        marca_carro,
-        modelo_carro,
-        ano_carro,
-      ]
-    );
-
-    return res.status(200).json({ resposta: ai_response });
-  } catch (err) {
-    console.error('❌ Erro no handler geral:', err);
-    return res.status(500).json({ error: 'Erro ao processar a mensagem' });
+  } catch (error) {
+    console.error('💥 ERRO CRÍTICO NO /api/chat:', error.message);
+    return res.status(500).json({ error: 'Falha na comunicação com a Relevance', details: error.message });
   }
 }
-
 
