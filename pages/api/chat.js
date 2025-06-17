@@ -28,13 +28,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const proxyURL = `${process.env.RELEVANCE_PROXY_URL || 'https://relevance-proxy-maia1600.replit.app'}/api/relay`;
-
-    const requestBody = {
-      message,
-      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b',
-      api_key: process.env.RELEVANCE_API_KEY,
-    };
+const response = await fetch('https://tamai-proxy-production.up.railway.app/api/relay', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    message,
+    agent_id: 'o_teu_agent_id',
+    api_key: process.env.RELEVANCE_API_KEY,
+  }),
+});
 
     console.log('📤 A enviar para proxy:', proxyURL);
     console.log('📦 Body do proxy →', requestBody);
