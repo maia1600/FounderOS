@@ -28,11 +28,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const proxyURL = 'https://tamai-proxy.maia1600.workers.dev';
+    const proxyURL = 'https://tamai-proxy.maia1600.workers.dev/';
 
     const requestBody = {
       message,
-      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b', // Substituir se for diferente
+      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b', // atualiza se necessário
       api_key: process.env.RELEVANCE_API_KEY,
     };
 
@@ -60,6 +60,9 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Resposta incompleta ou inválida da Relevance', relevanceData });
     }
 
+    // Podes guardar no Neon se quiseres (exemplo comentado)
+    // await pool.query('INSERT INTO conversations (...) VALUES (...)');
+
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
@@ -67,6 +70,7 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'Falha na comunicação com o proxy', details: error.message });
   }
 }
+
 
 
 
