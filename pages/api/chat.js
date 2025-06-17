@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const proxyURL = 'https://tamai-proxy-production.up.railway.app/api/relay';
+    const proxyURL = 'https://tamai-proxy.maia1600.workers.dev';
 
     const requestBody = {
       message,
