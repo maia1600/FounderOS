@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Parâmetros obrigatórios em falta' });
   }
 
+  
   try {
 const response = await fetch('https://tamai-proxy-production.up.railway.app/api/relay', {
   method: 'POST',
