@@ -27,19 +27,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Parâmetros obrigatórios em falta' });
   }
 
-  
   try {
-const response = await fetch('https://tamai-proxy-production.up.railway.app/api/relay', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    message,
-    agent_id: 'o_teu_agent_id',
-    api_key: process.env.RELEVANCE_API_KEY,
-  }),
-});
+    const proxyURL = 'https://tamai-proxy-production.up.railway.app/api/relay';
+
+    const requestBody = {
+      message,
+      agent_id: '3515dcce-eae9-40d1-ad18-c58915b4979b', // Substituir se for diferente
+      api_key: process.env.RELEVANCE_API_KEY,
+    };
 
     console.log('📤 A enviar para proxy:', proxyURL);
     console.log('📦 Body do proxy →', requestBody);
@@ -65,9 +60,6 @@ const response = await fetch('https://tamai-proxy-production.up.railway.app/api/
       return res.status(502).json({ error: 'Resposta incompleta ou inválida da Relevance', relevanceData });
     }
 
-    // Podes guardar no Neon se quiseres (exemplo comentado)
-    // await pool.query('INSERT INTO conversations (...) VALUES (...)');
-
     return res.status(200).json({ resposta: relevanceData });
 
   } catch (error) {
@@ -75,6 +67,7 @@ const response = await fetch('https://tamai-proxy-production.up.railway.app/api/
     return res.status(502).json({ error: 'Falha na comunicação com o proxy', details: error.message });
   }
 }
+
 
 
 
