@@ -1,41 +1,62 @@
-// pages/api/bookings.js
-import { sql } from "@vercel/postgres";
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido" });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  if (req.method === 'POST') {
+    console.log('📥 Dados recebidos:', req.body);
+
+    const {
+      nome,
+      email,
+      telefone,
+      servicos,
+      marca,
+      modelo,
+      ano,
+      start,
+      end,
+      marcado_por
+    } = req.body;
+
+    if (!nome || !email || !telefone || !servicos || !marca || !modelo || !ano || !start || !end || !marcado_por) {
+      return res.status(400).json({ error: 'Campos obrigatórios em falta.' });
+    }
+
+    try {
+      await pool.query(
+        `INSERT INTO bookings 
+         (nome, email, telefone, servicos, marca, modelo, ano, start, end, data_marcacao, marcado_por)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10)`,
+        [nome, email, telefone, servicos, marca, modelo, ano, start, end, marcado_por]
+      );
+
+      return res.status(201).json({ success: true, message: 'Marcação gravada com sucesso.' });
+    } catch (err) {
+      console.error('❌ Erro ao gravar marcação:', err);
+      return res.status(500).json({ error: 'Erro ao gravar marcação.' });
+    }
   }
 
-  const {
-    nome,
-    email,
-    telefone,
-    servicos,
-    marca,
-    modelo,
-    ano,
-    start,
-    end,
-    data_marcacao,
-    marcado_por
-  } = req.body;
-
-  if (!nome || !email || !telefone || !servicos || !marca || !modelo || !ano || !start || !end || !data_marcacao || !marcado_por) {
-    return res.status(400).json({ error: "Campos obrigatórios em falta" });
+  if (req.method === 'GET') {
+    try {
+      const { rows } = await pool.query('SELECT * FROM bookings ORDER BY start ASC');
+      return res.status(200).json(rows);
+    } catch (err) {
+      console.error('Erro no GET:', err);
+      return res.status(500).json({ error: 'Erro ao obter marcações.' });
+    }
   }
 
-  try {
-    await sql`
-      INSERT INTO bookings (
-        nome, email, telefone, servicos, marca, modelo, ano, start, end, data_marcacao, marcado_por, created_at
-      ) VALUES (
-        ${nome}, ${email}, ${telefone}, ${servicos}, ${marca}, ${modelo}, ${ano}, ${start}, ${end}, ${data_marcacao}, ${marcado_por}, NOW()
-      )
-    `;
-
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Erro ao inserir marcação:", error);
-    return res.status(500).json({ error: "Erro ao inserir marcação" });
-  }
+  res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
+  return res.status(405).end(`Método ${req.method} não permitido`);
 }
