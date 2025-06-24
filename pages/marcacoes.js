@@ -15,31 +15,22 @@ export default function Marcacoes() {
 
   const [estado, setEstado] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const res = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const res = await fetch('/api/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...form, created_by: 'Tânia', start: new Date().toISOString(), end: new Date().toISOString() }),
+  });
 
-    if (res.ok) {
-      setEstado('sucesso');
-      setForm({
-        nome: '',
-        email: '',
-        telefone: '',
-        marca: '',
-        modelo: '',
-        ano: '',
-        servicos: '',
-        observacoes: '',
-        created_by: 'Tânia',
-      });
-    } else {
-      setEstado('erro');
-    }
-  };
+  if (res.ok) {
+    setEstado('sucesso');
+    setForm({ nome: '', email: '', telefone: '', marca: '', modelo: '', ano: '', servicos: '', observacoes: '' });
+  } else {
+    setEstado('erro');
+  }
+};
+
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
