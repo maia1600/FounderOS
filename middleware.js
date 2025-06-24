@@ -8,6 +8,14 @@ const USERS = {
 };
 
 export function middleware(req) {
+  const { pathname } = req.nextUrl;
+  const method = req.method;
+
+  // Permitir GET sem autenticação
+  if (method === 'GET') {
+    return NextResponse.next();
+  }
+
   const basicAuth = req.headers.get('authorization');
 
   if (basicAuth) {
@@ -16,7 +24,6 @@ export function middleware(req) {
     const [user, password] = credentials.split(':');
 
     if (USERS[user] && USERS[user] === password) {
-      // Autenticação válida: permitir acesso e anexar o utilizador ao request
       const requestHeaders = new Headers(req.headers);
       requestHeaders.set('x-user', user);
 
@@ -29,7 +36,7 @@ export function middleware(req) {
   }
 
   const res = new NextResponse('Autenticação necessária', { status: 401 });
-  res.headers.set('www-authenticate', 'Basic realm="Tamai Protected Zone"');
+  res.headers.set('www-authenticate', 'Basic realm="TamaiProtected"');
   return res;
 }
 
