@@ -17,6 +17,9 @@ export default function Marcacoes() {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+
+  const user = localStorage.getItem('user') || 'Utilizador';
+
   const res = await fetch('/api/bookings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -26,8 +29,8 @@ const handleSubmit = async (e) => {
       telefone: form.telefone,
       servicos: form.servicos || 'revisao geral',
       start: new Date().toISOString(),
-      end: new Date(Date.now() + 3600000).toISOString(), // +1h
-      created_by: 'Tânia',
+      end: new Date(Date.now() + 3600000).toISOString(),
+      created_by: user,
     }),
   });
 
@@ -38,6 +41,7 @@ const handleSubmit = async (e) => {
     setEstado('erro');
   }
 };
+
 
 
   return (
