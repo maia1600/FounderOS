@@ -18,14 +18,14 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const { rows } = await pool.query('SELECT * FROM bookings ORDER BY start ASC');
-      res.status(200).json(rows);
+      return res.status(200).json(rows);
     } catch (err) {
       console.error('Erro no GET:', err);
-      res.status(500).json({ error: 'Erro ao obter marcações.' });
+      return res.status(500).json({ error: 'Erro ao obter marcações.' });
     }
   }
 
-  else if (req.method === 'POST') {
+  if (req.method === 'POST') {
     const { nome, email, telefone, servicos, start, end, created_by } = req.body;
 
     if (!nome || !servicos || !start || !end) {
@@ -54,12 +54,7 @@ export default async function handler(req, res) {
     }
   }
 
-  else {
-    res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
-    return res.status(405).end(`Método ${req.method} não permitido`);
-  }
-}
-
-    return res.status(405).end(`Método ${req.method} não permitido`);
-  }
+  // Se não for GET, POST ou OPTIONS
+  res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
+  return res.status(405).end(`Método ${req.method} não permitido`);
 }
