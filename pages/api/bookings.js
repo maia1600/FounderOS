@@ -6,12 +6,11 @@ const pool = new Pool({
 });
 
 export default async function handler(req, res) {
-  // Permitir CORS para qualquer origem (podes depois limitar ao domínio do RelevanceAI)
+  // Permitir CORS para qualquer origem
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder a pré-pedidos (OPTIONS)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -38,7 +37,15 @@ export default async function handler(req, res) {
         `INSERT INTO bookings 
          (nome, email, telefone, servicos, start, "end", created_by)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [nome, email, telefone, servicos, start, end, created_by || 'SilviaBot']
+        [
+          nome,
+          email || '',
+          telefone || '',
+          servicos,
+          start,
+          end,
+          created_by || 'Utilizador'
+        ]
       );
       return res.status(201).json({ success: true, message: 'Marcação gravada com sucesso.' });
     } catch (err) {
@@ -49,6 +56,10 @@ export default async function handler(req, res) {
 
   else {
     res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
+    return res.status(405).end(`Método ${req.method} não permitido`);
+  }
+}
+
     return res.status(405).end(`Método ${req.method} não permitido`);
   }
 }
