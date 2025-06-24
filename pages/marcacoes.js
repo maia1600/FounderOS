@@ -10,6 +10,7 @@ export default function Marcacoes() {
     ano: '',
     servicos: '',
     observacoes: '',
+    created_by: 'Tânia', // Valor fixo inicial, mas pode ser substituído via localStorage
   });
 
   const [estado, setEstado] = useState(null);
@@ -17,22 +18,23 @@ export default function Marcacoes() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const user = localStorage.getItem('user') || 'Utilizador';
+    const user = localStorage.getItem('user') || form.created_by;
 
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        nome: form.nome || 'Anónimo',
+        nome: form.nome || 'teste',
         email: form.email,
         telefone: form.telefone,
-        servicos: form.servicos || 'Serviço geral',
         marca: form.marca,
         modelo: form.modelo,
         ano: form.ano,
+        servicos: form.servicos || 'revisão geral',
+        observacoes: form.observacoes,
         start: new Date().toISOString(),
-        end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 horas depois
-        marcado_por: user,
+        end: new Date(Date.now() + 3600000).toISOString(),
+        created_by: user,
       }),
     });
 
@@ -47,6 +49,7 @@ export default function Marcacoes() {
         ano: '',
         servicos: '',
         observacoes: '',
+        created_by: 'Tânia',
       });
     } else {
       setEstado('erro');
@@ -59,9 +62,11 @@ export default function Marcacoes() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {['nome', 'email', 'telefone', 'marca', 'modelo', 'ano', 'servicos', 'observacoes'].map((field) => (
           <div key={field}>
-            <label className="block capitalize">{field}</label>
+            <label htmlFor={field} className="block capitalize">{field}</label>
             <input
               type="text"
+              name={field}
+              id={field}
               value={form[field]}
               onChange={(e) => setForm({ ...form, [field]: e.target.value })}
               className="w-full border rounded px-3 py-2"
@@ -69,17 +74,15 @@ export default function Marcacoes() {
           </div>
         ))}
 
+        <input type="hidden" name="created_by" value={form.created_by} />
+
         <button type="submit" className="bg-black text-white px-4 py-2 rounded">
           Enviar
         </button>
       </form>
 
-      {estado === 'sucesso' && (
-        <p className="mt-4 text-green-600">Marcação enviada com sucesso!</p>
-      )}
-      {estado === 'erro' && (
-        <p className="mt-4 text-red-600">Erro ao enviar marcação.</p>
-      )}
+      {estado === 'sucesso' && <p className="mt-4 text-green-600">Marcação enviada com sucesso!</p>}
+      {estado === 'erro' && <p className="mt-4 text-red-600">Erro ao enviar marcação.</p>}
     </div>
   );
 }
