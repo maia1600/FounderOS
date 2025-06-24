@@ -9,7 +9,8 @@ export default function Marcacoes() {
     modelo: '',
     ano: '',
     servicos: '',
-    observacoes: ''
+    observacoes: '',
+    created_by: 'Tânia', // campo adicionado
   });
 
   const [estado, setEstado] = useState(null);
@@ -24,7 +25,17 @@ export default function Marcacoes() {
 
     if (res.ok) {
       setEstado('sucesso');
-      setForm({ nome: '', email: '', telefone: '', marca: '', modelo: '', ano: '', servicos: '', observacoes: '' });
+      setForm({
+        nome: '',
+        email: '',
+        telefone: '',
+        marca: '',
+        modelo: '',
+        ano: '',
+        servicos: '',
+        observacoes: '',
+        created_by: 'Tânia',
+      });
     } else {
       setEstado('erro');
     }
@@ -45,6 +56,18 @@ export default function Marcacoes() {
             />
           </div>
         ))}
+
+        {/* Campo criado por (oculto ou visível, aqui visível para debug) */}
+        <div>
+          <label className="block">Marcado por</label>
+          <input
+            type="text"
+            value={form.created_by}
+            onChange={(e) => setForm({ ...form, created_by: e.target.value })}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+
         <button type="submit" className="bg-black text-white px-4 py-2 rounded">
           Enviar
         </button>
