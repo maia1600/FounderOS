@@ -1,42 +1,45 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
-export function middleware(request) {
-  const basicAuth = request.headers.get('authorization');
+export function middleware(req) {
+  const basicAuth = req.headers.get('authorization')
+  const url = req.nextUrl
 
-  // Permitir assets estáticos
-  const pathname = request.nextUrl.pathname;
-  if (
-    pathname.startsWith('/_next') || 
-    pathname.endsWith('.js') || 
-    pathname.endsWith('.css') || 
-    pathname.endsWith('.ico')
-  ) {
-    return NextResponse.next();
+  // Permitir ficheiros estáticos e rota de marcações sem autenticação
+  const publicPaths = [
+    '/favicon.ico',
+    '/manifest.json',
+    '/robots.txt',
+    '/marcacoes',
+  ]
+  const staticAssets = url.pathname.startsWith('/_next')
+
+  const isPublic = publicPaths.includes(url.pathname) || staticAssets
+
+  if (isPublic) {
+    return NextResponse.next()
   }
 
-  if (!basicAuth) {
-    return new Response('Autenticação requerida', {
-      status: 401,
-      headers: {
-        'WWW-Authenticate': 'Basic realm="Secure Area"',
-      },
-    });
+  // Autenticação básica para rotas protegidas
+  const validUsers = {
+    'TGPT': 'tamai123',
+    'Tania': 'tamai123',
+    'Staff': 'tamai123',
   }
 
-  const authValue = basicAuth.split(' ')[1];
-  const [user, pass] = atob(authValue).split(':');
+  if (basicAuth) {
+    const [_, encoded] = basicAuth.split(' ')
+    const decoded = Buffer.from(encoded, 'base64').toString()
+    const [user, pwd] = decoded.split(':')
 
-  const isValid =
-    ['TGPT', 'Tania', 'Staff'].includes(user) &&
-    pass === 'tamai123';
+    if (validUsers[user] === pwd) {
+      return NextResponse.next()
+    }
+  }
 
-  if (isValid) return NextResponse.next();
-
-  return new Response('Não autorizado', {
+  return new Response('Unauthorized', {
     status: 401,
-  });
+    headers: {
+      'WWW-Authenticate': 'Basic realm="Área Segura"',
+    },
+  })
 }
-
-export const config = {
-  matcher: ['/marcacoes', '/api/bookings'],
-};
