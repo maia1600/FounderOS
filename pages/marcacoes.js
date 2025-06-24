@@ -10,39 +10,48 @@ export default function Marcacoes() {
     ano: '',
     servicos: '',
     observacoes: '',
-    created_by: 'Tânia', // Valor fixo e invisível
   });
 
   const [estado, setEstado] = useState(null);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const user = localStorage.getItem('user') || 'Utilizador';
+    const user = localStorage.getItem('user') || 'Utilizador';
 
-  const res = await fetch('/api/bookings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      nome: form.nome || 'teste',
-      email: form.email,
-      telefone: form.telefone,
-      servicos: form.servicos || 'revisao geral',
-      start: new Date().toISOString(),
-      end: new Date(Date.now() + 3600000).toISOString(),
-      created_by: user,
-    }),
-  });
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: form.nome || 'Anónimo',
+        email: form.email,
+        telefone: form.telefone,
+        servicos: form.servicos || 'Serviço geral',
+        marca: form.marca,
+        modelo: form.modelo,
+        ano: form.ano,
+        start: new Date().toISOString(),
+        end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 horas depois
+        marcado_por: user,
+      }),
+    });
 
-  if (res.ok) {
-    setEstado('sucesso');
-    setForm({ nome: '', email: '', telefone: '', marca: '', modelo: '', ano: '', servicos: '', observacoes: '' });
-  } else {
-    setEstado('erro');
-  }
-};
-
-
+    if (res.ok) {
+      setEstado('sucesso');
+      setForm({
+        nome: '',
+        email: '',
+        telefone: '',
+        marca: '',
+        modelo: '',
+        ano: '',
+        servicos: '',
+        observacoes: '',
+      });
+    } else {
+      setEstado('erro');
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
@@ -60,15 +69,17 @@ const handleSubmit = async (e) => {
           </div>
         ))}
 
-        {/* Campo hidden com o valor "Tânia" */}
-        <input type="hidden" value="Tânia" />
-
         <button type="submit" className="bg-black text-white px-4 py-2 rounded">
           Enviar
         </button>
       </form>
-      {estado === 'sucesso' && <p className="mt-4 text-green-600">Marcação enviada com sucesso!</p>}
-      {estado === 'erro' && <p className="mt-4 text-red-600">Erro ao enviar marcação.</p>}
+
+      {estado === 'sucesso' && (
+        <p className="mt-4 text-green-600">Marcação enviada com sucesso!</p>
+      )}
+      {estado === 'erro' && (
+        <p className="mt-4 text-red-600">Erro ao enviar marcação.</p>
+      )}
     </div>
   );
 }
