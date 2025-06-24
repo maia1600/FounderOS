@@ -20,7 +20,15 @@ const handleSubmit = async (e) => {
   const res = await fetch('/api/bookings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...form, created_by: 'Tânia', start: new Date().toISOString(), end: new Date().toISOString() }),
+    body: JSON.stringify({
+      nome: form.nome || 'teste',
+      email: form.email,
+      telefone: form.telefone,
+      servicos: form.servicos || 'revisao geral',
+      start: new Date().toISOString(),
+      end: new Date(Date.now() + 3600000).toISOString(), // +1h
+      created_by: 'Tânia',
+    }),
   });
 
   if (res.ok) {
