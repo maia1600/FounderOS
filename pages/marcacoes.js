@@ -10,7 +10,7 @@ export default function Marcacoes() {
     ano: '',
     servicos: '',
     observacoes: '',
-    created_by: 'Tânia', // campo adicionado
+    created_by: 'Tânia', // Valor fixo e invisível
   });
 
   const [estado, setEstado] = useState(null);
@@ -57,16 +57,8 @@ export default function Marcacoes() {
           </div>
         ))}
 
-        {/* Campo criado por (oculto ou visível, aqui visível para debug) */}
-        <div>
-          <label className="block">Marcado por</label>
-          <input
-            type="text"
-            value={form.created_by}
-            onChange={(e) => setForm({ ...form, created_by: e.target.value })}
-            className="w-full border rounded px-3 py-2"
-          />
-        </div>
+        {/* Campo hidden com o valor "Tânia" */}
+        <input type="hidden" value="Tânia" />
 
         <button type="submit" className="bg-black text-white px-4 py-2 rounded">
           Enviar
