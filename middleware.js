@@ -1,45 +1,39 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+
+const USERS = {
+  TGPT: 'password123',
+  Tânia: 'password123',
+  Staff: 'password123',
+};
 
 export function middleware(req) {
-  const basicAuth = req.headers.get('authorization')
-  const url = req.nextUrl
-
-  // Permitir ficheiros estáticos e rota de marcações sem autenticação
-  const publicPaths = [
-    '/favicon.ico',
-    '/manifest.json',
-    '/robots.txt',
-    '/marcacoes',
-  ]
-  const staticAssets = url.pathname.startsWith('/_next')
-
-  const isPublic = publicPaths.includes(url.pathname) || staticAssets
-
-  if (isPublic) {
-    return NextResponse.next()
-  }
-
-  // Autenticação básica para rotas protegidas
-  const validUsers = {
-    'TGPT': 'tamai123',
-    'Tania': 'tamai123',
-    'Staff': 'tamai123',
-  }
+  const basicAuth = req.headers.get('authorization');
 
   if (basicAuth) {
-    const [_, encoded] = basicAuth.split(' ')
-    const decoded = Buffer.from(encoded, 'base64').toString()
-    const [user, pwd] = decoded.split(':')
+    const [, base64Credentials] = basicAuth.split(' ');
+    const credentials = atob(base64Credentials);
+    const [user, password] = credentials.split(':');
 
-    if (validUsers[user] === pwd) {
-      return NextResponse.next()
+    if (USERS[user] && USERS[user] === password) {
+      // Autenticação válida: permitir acesso e anexar o utilizador ao request
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set('x-user', user);
+
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
   }
 
-  return new Response('Unauthorized', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Área Segura"',
-    },
-  })
+  const res = new NextResponse('Autenticação necessária', { status: 401 });
+  res.headers.set('www-authenticate', 'Basic realm="Tamai Protected Zone"');
+  return res;
 }
+
+export const config = {
+  matcher: ['/marcacoes'],
+};
+
