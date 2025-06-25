@@ -9,30 +9,21 @@ export default function Marcacoes() {
     modelo: '',
     ano: '',
     servicos: '',
-    marcado_por: ''
+    data_pretendida: '',
+    data_prevista_conclusao: '',
+    data_marcacao: '',
+    marcado_por: '', // ← deixado vazio para o Formi preencher (ex: "TGPT")
   });
 
   const [estado, setEstado] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = localStorage.getItem('user') || form.marcado_por;
 
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: form.nome || 'teste',
-        email: form.email,
-        telefone: form.telefone,
-        marca: form.marca,
-        modelo: form.modelo,
-        ano: form.ano,
-        servicos: form.servicos || 'revisão geral',
-        start: new Date().toISOString(),
-        data_fim: new Date(Date.now() + 3600000).toISOString(),
-        marcado_por: user,
-      }),
+      body: JSON.stringify(form),
     });
 
     if (res.ok) {
@@ -45,7 +36,10 @@ export default function Marcacoes() {
         modelo: '',
         ano: '',
         servicos: '',
-        marcado_por: 'Tânia',
+        data_pretendida: '',
+        data_prevista_conclusao: '',
+        data_marcacao: '',
+        marcado_por: '',
       });
     } else {
       setEstado('erro');
@@ -56,9 +50,12 @@ export default function Marcacoes() {
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
       <h1 className="text-2xl font-bold mb-4">Marcação de Serviço</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {['nome', 'email', 'telefone', 'marca', 'modelo', 'ano', 'servicos'].map((field) => (
+        {[
+          'nome', 'email', 'telefone', 'marca', 'modelo', 'ano', 'servicos',
+          'data_pretendida', 'data_prevista_conclusao', 'data_marcacao', 'marcado_por'
+        ].map((field) => (
           <div key={field}>
-            <label htmlFor={field} className="block capitalize">{field}</label>
+            <label htmlFor={field} className="block capitalize">{field.replace(/_/g, ' ')}</label>
             <input
               type="text"
               name={field}
@@ -70,8 +67,6 @@ export default function Marcacoes() {
           </div>
         ))}
 
-        <input type="hidden" name="marcado_por" value={form.marcado_por} />
-
         <button type="submit" className="bg-black text-white px-4 py-2 rounded">
           Enviar
         </button>
@@ -82,6 +77,7 @@ export default function Marcacoes() {
     </div>
   );
 }
+
 
 
 
