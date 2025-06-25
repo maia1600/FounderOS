@@ -10,7 +10,7 @@ export default function Marcacoes() {
     ano: '',
     servicos: '',
     observacoes: '',
-    created_by: 'Tânia', // Valor fixo inicial, mas pode ser substituído via localStorage
+    marcado_por: 'Tânia', // Alinhado com a base de dados
   });
 
   const [estado, setEstado] = useState(null);
@@ -18,7 +18,7 @@ export default function Marcacoes() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const user = localStorage.getItem('user') || form.created_by;
+    const user = localStorage.getItem('user') || form.marcado_por;
 
     const res = await fetch('/api/bookings', {
       method: 'POST',
@@ -31,10 +31,9 @@ export default function Marcacoes() {
         modelo: form.modelo,
         ano: form.ano,
         servicos: form.servicos || 'revisão geral',
-        observacoes: form.observacoes,
         start: new Date().toISOString(),
         end: new Date(Date.now() + 3600000).toISOString(),
-        created_by: user,
+        marcado_por: user, // ← CAMPO correto
       }),
     });
 
@@ -49,7 +48,7 @@ export default function Marcacoes() {
         ano: '',
         servicos: '',
         observacoes: '',
-        created_by: 'Tânia',
+        marcado_por: 'Tânia',
       });
     } else {
       setEstado('erro');
@@ -74,7 +73,7 @@ export default function Marcacoes() {
           </div>
         ))}
 
-        <input type="hidden" name="created_by" value={form.created_by} />
+        <input type="hidden" name="marcado_por" value={form.marcado_por} />
 
         <button type="submit" className="bg-black text-white px-4 py-2 rounded">
           Enviar
@@ -86,4 +85,5 @@ export default function Marcacoes() {
     </div>
   );
 }
+
 
