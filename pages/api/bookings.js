@@ -13,8 +13,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'POST') {
-    console.log('📥 Dados recebidos:', req.body);
-
     const {
       nome,
       email,
@@ -38,7 +36,7 @@ export default async function handler(req, res) {
 
     try {
       await pool.query(
-        `INSERT INTO marcacoes (
+        `INSERT INTO bookings (
           nome, email, telefone, marca, modelo, ano, servicos,
           data_pretendida, data_prevista_conclusao, data_marcacao, marcado_por
         ) VALUES (
@@ -60,7 +58,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const { rows } = await pool.query('SELECT * FROM marcacoes ORDER BY data_marcacao DESC');
+      const { rows } = await pool.query('SELECT * FROM bookings ORDER BY data_marcacao DESC');
       return res.status(200).json(rows);
     } catch (err) {
       console.error('Erro no GET:', err);
