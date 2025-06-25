@@ -24,20 +24,20 @@ export default async function handler(req, res) {
       modelo,
       ano,
       start,
-      end,
+      data_fim,
       marcado_por
     } = req.body;
 
-    if (!nome || !email || !telefone || !servicos || !marca || !modelo || !ano || !start || !end || !marcado_por) {
+    if (!nome || !email || !telefone || !servicos || !marca || !modelo || !ano || !start || !data_fim || !marcado_por) {
       return res.status(400).json({ error: 'Campos obrigatórios em falta.' });
     }
 
     try {
       await pool.query(
         `INSERT INTO bookings 
-         (nome, email, telefone, servicos, marca, modelo, ano, start, end, data_marcacao, marcado_por)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10)`,
-        [nome, email, telefone, servicos, marca, modelo, ano, start, end, marcado_por]
+         (nome, email, telefone, servicos, marca, modelo, ano, start, data_fim, marcado_por)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [nome, email, telefone, servicos, marca, modelo, ano, start, data_fim, marcado_por]
       );
 
       return res.status(201).json({ success: true, message: 'Marcação gravada com sucesso.' });
@@ -60,3 +60,4 @@ export default async function handler(req, res) {
   res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
   return res.status(405).end(`Método ${req.method} não permitido`);
 }
+
