@@ -9,15 +9,13 @@ export default function Marcacoes() {
     modelo: '',
     ano: '',
     servicos: '',
-    observacoes: '',
-    marcado_por: 'Tânia', // Alinhado com a base de dados
+    marcado_por: ''
   });
 
   const [estado, setEstado] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const user = localStorage.getItem('user') || form.marcado_por;
 
     const res = await fetch('/api/bookings', {
@@ -32,8 +30,8 @@ export default function Marcacoes() {
         ano: form.ano,
         servicos: form.servicos || 'revisão geral',
         start: new Date().toISOString(),
-        end: new Date(Date.now() + 3600000).toISOString(),
-        marcado_por: user, // ← CAMPO correto
+        data_fim: new Date(Date.now() + 3600000).toISOString(),
+        marcado_por: user,
       }),
     });
 
@@ -47,7 +45,6 @@ export default function Marcacoes() {
         modelo: '',
         ano: '',
         servicos: '',
-        observacoes: '',
         marcado_por: 'Tânia',
       });
     } else {
@@ -59,7 +56,7 @@ export default function Marcacoes() {
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
       <h1 className="text-2xl font-bold mb-4">Marcação de Serviço</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {['nome', 'email', 'telefone', 'marca', 'modelo', 'ano', 'servicos', 'observacoes'].map((field) => (
+        {['nome', 'email', 'telefone', 'marca', 'modelo', 'ano', 'servicos'].map((field) => (
           <div key={field}>
             <label htmlFor={field} className="block capitalize">{field}</label>
             <input
@@ -85,5 +82,6 @@ export default function Marcacoes() {
     </div>
   );
 }
+
 
 
