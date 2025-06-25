@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
 });
 
 export default async function handler(req, res) {
@@ -19,25 +19,36 @@ export default async function handler(req, res) {
       nome,
       email,
       telefone,
-      servicos,
       marca,
       modelo,
       ano,
-      start,
-      data_fim,
+      servicos,
+      data_pretendida,
+      data_prevista_conclusao,
+      data_marcacao,
       marcado_por
     } = req.body;
 
-    if (!nome || !email || !telefone || !servicos || !marca || !modelo || !ano || !start || !data_fim || !marcado_por) {
+    if (
+      !nome || !email || !telefone || !marca || !modelo || !ano || !servicos ||
+      !data_pretendida || !data_prevista_conclusao || !data_marcacao || !marcado_por
+    ) {
       return res.status(400).json({ error: 'Campos obrigatórios em falta.' });
     }
 
     try {
       await pool.query(
-        `INSERT INTO bookings 
-         (nome, email, telefone, servicos, marca, modelo, ano, start, data_fim, marcado_por)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [nome, email, telefone, servicos, marca, modelo, ano, start, data_fim, marcado_por]
+        `INSERT INTO marcacoes (
+          nome, email, telefone, marca, modelo, ano, servicos,
+          data_pretendida, data_prevista_conclusao, data_marcacao, marcado_por
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7,
+          $8, $9, $10, $11
+        )`,
+        [
+          nome, email, telefone, marca, modelo, ano, servicos,
+          data_pretendida, data_prevista_conclusao, data_marcacao, marcado_por
+        ]
       );
 
       return res.status(201).json({ success: true, message: 'Marcação gravada com sucesso.' });
@@ -49,7 +60,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const { rows } = await pool.query('SELECT * FROM bookings ORDER BY start ASC');
+      const { rows } = await pool.query('SELECT * FROM marcacoes ORDER BY data_marcacao DESC');
       return res.status(200).json(rows);
     } catch (err) {
       console.error('Erro no GET:', err);
