@@ -67,7 +67,12 @@ export default function Marcacoes() {
           </div>
         ))}
 
-        <button type="submit" className="bg-black text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          id="btn-enviar"
+          aria-label="Enviar"
+          className="bg-black text-white px-4 py-2 rounded"
+        >
           Enviar
         </button>
       </form>
@@ -77,6 +82,7 @@ export default function Marcacoes() {
     </div>
   );
 }
+
 
 
 
