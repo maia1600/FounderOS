@@ -5,6 +5,13 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
+// Função para garantir que o valor é um timestamp ISO válido
+const parseData = (val) => {
+  const parsed = new Date(val);
+  if (isNaN(parsed.getTime())) throw new Error(`Data inválida: ${val}`);
+  return parsed.toISOString();
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -44,15 +51,24 @@ export default async function handler(req, res) {
           $8, $9, $10, $11
         )`,
         [
-          nome, email, telefone, marca, modelo, ano, servicos,
-          data_pretendida, data_prevista_conclusao, data_marcacao, marcado_por
+          nome,
+          email,
+          telefone,
+          marca,
+          modelo,
+          ano,
+          servicos,
+          parseData(data_pretendida),
+          parseData(data_prevista_conclusao),
+          parseData(data_marcacao),
+          marcado_por
         ]
       );
 
       return res.status(201).json({ success: true, message: 'Marcação gravada com sucesso.' });
     } catch (err) {
-      console.error('❌ Erro ao gravar marcação:', err);
-      return res.status(500).json({ error: 'Erro ao gravar marcação.' });
+      console.error('❌ Erro ao gravar marcação:', err.message, err.stack);
+      return res.status(500).json({ error: 'Erro ao gravar marcação.', details: err.message });
     }
   }
 
@@ -61,7 +77,7 @@ export default async function handler(req, res) {
       const { rows } = await pool.query('SELECT * FROM bookings ORDER BY data_marcacao DESC');
       return res.status(200).json(rows);
     } catch (err) {
-      console.error('Erro no GET:', err);
+      console.error('Erro no GET:', err.message, err.stack);
       return res.status(500).json({ error: 'Erro ao obter marcações.' });
     }
   }
